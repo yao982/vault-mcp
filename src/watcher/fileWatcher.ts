@@ -12,7 +12,8 @@ const SUPPORTED_EXTS = new Set([
   ".cpp",
   ".py",
   ".js",
-  ".ts"
+  ".ts",
+  ".m"
 ]);
 
 /**

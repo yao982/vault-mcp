@@ -33,7 +33,7 @@
 ### 1. Clone & Build
 
 ```bash
-git clone https://github.com/your-username/vault-mcp.git
+git clone https://github.com/yao982/vault-mcp.git
 cd vault-mcp
 npm install
 npm run build

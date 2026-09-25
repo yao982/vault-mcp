@@ -14,7 +14,9 @@ const IGNORED_DIRS = new Set([
   "assets",
   "_assets",
   "dist",
-  "build"
+  "build",
+  "slprj",
+  "Model"
 ]);
 
 const SUPPORTED_EXTS = new Set([
@@ -26,7 +28,8 @@ const SUPPORTED_EXTS = new Set([
   ".cpp",
   ".py",
   ".js",
-  ".ts"
+  ".ts",
+  ".m"
 ]);
 
 export class VaultIndexer {
