@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -18,7 +19,7 @@ test("built MCP server uses the cached model and labels unrelated results as can
   });
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: ["dist/index.js", "--path", scratch, "--profile", "bge-small-zh"],
+    args: ["dist/index.js", "--path", scratch],
     cwd: project,
     env: { ...process.env, VAULT_OFFLINE: "1", VAULT_EMBEDDINGS: "on" } as Record<string, string>,
     stderr: "pipe",
@@ -27,6 +28,9 @@ test("built MCP server uses the cached model and labels unrelated results as can
   transport.stderr?.on("data", d => { logs += d.toString(); });
   const client = new Client({ name: "cached-model-protocol", version: "1" });
   try {
+    // Model changes use the explicit index command; serve honors the persisted profile.
+    execFileSync(process.execPath, ["dist/index.js", "index", "--path", scratch,
+      "--profile", "bge-small-zh", "--offline", "--no-embeddings"], { cwd: project, stdio: "pipe" });
     const before = performance.now();
     await client.connect(transport);
     t.diagnostic(`MCP handshake ${Math.round(performance.now() - before)} ms (local observation, not a latency guarantee)`);

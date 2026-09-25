@@ -143,8 +143,11 @@ function normalizeVaultPath(vaultRoot: string, rawPath: string, requiredExtensio
   if (!requiredExtension && ![".md", ".markdown"].includes(extension)) {
     throw new Error(`Import Markdown path must use .md or .markdown: ${rawPath}`);
   }
-  const candidate = path.resolve(vaultRoot, ...parts);
   const root = fs.realpathSync(vaultRoot);
+  // Resolve the vault root before deriving the candidate. On macOS, for
+  // example, /var/... commonly canonicalizes to /private/var/...; mixing the
+  // alias and canonical forms makes an in-vault path look like traversal.
+  const candidate = path.resolve(root, ...parts);
   const lexicalRelative = path.relative(root, candidate);
   if (lexicalRelative === ".." || lexicalRelative.startsWith(`..${path.sep}`) || path.isAbsolute(lexicalRelative)) {
     throw new Error(`Import path escapes the vault root: ${rawPath}`);

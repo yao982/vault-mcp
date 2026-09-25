@@ -36,7 +36,7 @@ export async function runCli(args = process.argv.slice(2)): Promise<void> {
   if (!["serve", "index", "search", "read", "status", "doctor", "import"].includes(command)) throw new Error(`未知命令 ${command}。运行 --help 查看用法。`);
   if (v.json && command === "serve") throw new Error("serve 的标准输出只用于 MCP 协议；请移除 --json。");
   if (v["recover-lock"] && command !== "doctor") throw new Error("--recover-lock 只能与 doctor 一起使用。");
-  if (v.profile && !["serve", "index", "import"].includes(command)) throw new Error("请使用 index --profile 切换模型。");
+  if (v.profile && command !== "index") throw new Error("请使用 index --profile 切换模型。");
   if (v.profile && !["bge-small-zh", "multilingual-e5-small"].includes(v.profile)) throw new Error("未知模型配置；支持 bge-small-zh、multilingual-e5-small。");
   if (v.offline) process.env.VAULT_OFFLINE = "1";
   if (v["no-embeddings"]) process.env.VAULT_EMBEDDINGS = "off";

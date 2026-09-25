@@ -1,4 +1,4 @@
-import { pipeline, env } from "@xenova/transformers";
+import { pipeline, env } from "@huggingface/transformers";
 import {
   getEmbeddingProfile,
   inspectEmbeddingCache,
@@ -15,8 +15,7 @@ const MAX_REASONABLE_TOKEN_LIMIT = 1_000_000;
 export interface EmbeddingTokenizer {
   encode(
     text: string,
-    textPair?: string | null,
-    options?: { add_special_tokens?: boolean }
+    options?: { text_pair?: string | null; add_special_tokens?: boolean }
   ): ArrayLike<number>;
   model_max_length?: unknown;
 }
@@ -77,7 +76,7 @@ export function splitTextIntoTokenWindows(
   const windows: TokenWindow[] = [];
   const split = (codePoints: string[]): void => {
     const windowText = codePoints.join("");
-    const tokenCount = tokenizer.encode(prefix + windowText, null, { add_special_tokens: true }).length;
+    const tokenCount = tokenizer.encode(prefix + windowText, { add_special_tokens: true }).length;
     if (tokenCount <= maxTokens) {
       windows.push({ text: windowText, tokenCount });
       return;
@@ -205,7 +204,7 @@ export class EmbeddingService {
         throw new Error("Embedding model returned vectors with inconsistent dimensions.");
       }
 
-      const effectiveTokens = tokenizer.encode(window.text, null, { add_special_tokens: false }).length;
+      const effectiveTokens = tokenizer.encode(window.text, { add_special_tokens: false }).length;
       const weight = Math.max(1, effectiveTokens);
       for (let i = 0; i < vector.length; i++) {
         weighted[i] += Number(vector[i]) * weight;
@@ -288,7 +287,8 @@ export class EmbeddingService {
       {
         cache_dir: this.cache.cacheDir,
         local_files_only: this.offline,
-        quantized: true,
+        dtype: "q8",
+        device: "cpu",
       }
     );
     const runtime = loaded as unknown as {

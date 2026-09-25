@@ -3,8 +3,24 @@
   "version": "0.3.0-preview.1",
   "description": "Local research retrieval over papers, notes and code with multilingual search and verifiable citations. MCP and CLI.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/yao982/vault-mcp.git" },
-  "files": ["dist/**/*.js", "sample_vault/**/*.md", "sample_vault/**/*.pdf", "sample_vault/code/quicksort.c", "sample_vault/code/streaming_mean.py", "README.md", "README_EN.md", "LICENSE", "docs", "npm-shrinkwrap.json"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yao982/vault-mcp.git"
+  },
+  "files": [
+    "dist/**/*.js",
+    "sample_vault/**/*.md",
+    "sample_vault/**/*.pdf",
+    "sample_vault/code/quicksort.c",
+    "sample_vault/code/streaming_mean.py",
+    "README.md",
+    "README_EN.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "docs",
+    "npm-shrinkwrap.json"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -24,19 +40,15 @@
     "benchmark:bge": "npm run build && node benchmarks/run.mjs --bge"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": "^22.14.0 || ^24.0.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.0",
-    "@xenova/transformers": "^2.17.2",
     "better-sqlite3": "^13.0.3",
     "chokidar": "^5.0.0",
     "pdfjs-dist": "6.3.289",
-    "zod": "^3.24.2"
-  },
-  "overrides": {
-    "protobufjs": "7.6.6",
-    "sharp": "0.35.4"
+    "zod": "^3.24.2",
+    "@huggingface/transformers": "4.3.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",

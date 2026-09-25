@@ -16,7 +16,7 @@
 复现录制：
 
 ```sh
-npm ci
+npm ci --ignore-scripts
 npm run models:prepare
 node scripts/record-demo.mjs
 ```

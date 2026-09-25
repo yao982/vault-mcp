@@ -20,10 +20,19 @@ try {
   assert.ok(!packed.files.some(f => /\.db(?:-|$)|\.env|\.lock$|\.cache/.test(f.path)), 'Package must not contain private/runtime data');
   assert.ok(packed.files.some(f => f.path === 'npm-shrinkwrap.json'), 'Published dependency fixes must be carried by npm shrinkwrap');
   const prefix = path.join(scratch, 'install');
-  run(process.execPath, [npmCli, 'install', '--prefix', prefix, '--no-audit', '--no-fund', path.join(scratch, packed.filename)]);
+  run(process.execPath, [npmCli, 'install', '--ignore-scripts', '--prefix', prefix, '--no-audit', '--no-fund', path.join(scratch, packed.filename)]);
   const entry = path.join(prefix, 'node_modules/vault-mcp/dist/index.js');
   const expected = JSON.parse(fs.readFileSync(path.join(project, 'package.json'))).version;
   assert.equal(run(process.execPath, [entry, '--version']).trim(), expected);
+  const dependencyCheck = JSON.parse(run(process.execPath, ['--input-type=module', '-e', `
+    import { createRequire } from 'node:module';
+    const require = createRequire(${JSON.stringify(entry)});
+    const runtime = require.resolve('@huggingface/transformers');
+    const fromRuntime = createRequire(runtime);
+    console.log(JSON.stringify({ sharp: fromRuntime('sharp').versions.sharp }));
+  `]));
+  assert.equal(dependencyCheck.sharp, '0.35.4', 'Consumers must install the patched native dependency too');
+  run(process.execPath, [npmCli, 'audit', '--prefix', prefix, '--omit=dev']);
   const vault = path.join(scratch, 'vault');
   fs.mkdirSync(vault);
   fs.writeFileSync(path.join(vault, 'note.md'), '# Package verification\ninstallcanary 本地科研知识库');
@@ -33,10 +42,19 @@ try {
   assert.equal(call(['search', 'installcanary']).results[0].relativePath, 'note.md');
   assert.match(call(['read', 'note.md']).text, /installcanary/);
   assert.equal(call(['status']).embedding.profile, 'multilingual-e5-small');
+  if (process.env.VAULT_PACKAGE_MODEL_TEST === '1') {
+    const modelEnv = { ...env, VAULT_EMBEDDINGS: 'on' };
+    const result = JSON.parse(run(process.execPath, [entry, 'index', '--path', vault, '--offline', '--json'], { env: modelEnv }));
+    assert.equal(result.totalVectors, result.totalChunks);
+    assert.ok(result.totalVectors > 0);
+    const searched = JSON.parse(run(process.execPath, [entry, 'search', '本地科研知识库', '--mode', 'vector', '--path', vault, '--offline', '--json'], { env: modelEnv }));
+    assert.equal(searched.mode, 'vector', 'The installed model must run without lexical fallback');
+    assert.equal(searched.results[0].relativePath, 'note.md');
+  }
   // npm's platform-specific executable shim must be present too.
   const bin = path.join(prefix, 'node_modules/.bin', process.platform === 'win32' ? 'vault-mcp.cmd' : 'vault-mcp');
   assert.ok(fs.existsSync(bin));
-  console.log(JSON.stringify({ installed: packed.filename, version: expected, platform: process.platform, node: process.version, files: packed.files.length, checks: ['tarball privacy', 'executable shim', 'index', 'search', 'read', 'status'] }, null, 2));
+  console.log(JSON.stringify({ installed: packed.filename, version: expected, platform: process.platform, node: process.version, files: packed.files.length, dependencyCheck, realInstalledModel: process.env.VAULT_PACKAGE_MODEL_TEST === '1', checks: ['tarball privacy', 'consumer dependency audit', 'executable shim', 'index', 'search', 'read', 'status'] }, null, 2));
 } finally {
   assert.equal(path.dirname(scratch), path.resolve(os.tmpdir()));
   fs.rmSync(scratch, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });

@@ -3,7 +3,7 @@ import test from "node:test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { env as transformersEnv } from "@xenova/transformers";
+import { env as transformersEnv } from "@huggingface/transformers";
 import {
   EmbeddingService,
   type EmbeddingModelRuntime,
@@ -19,7 +19,7 @@ function makeRuntime(options: {
 } = {}): EmbeddingModelRuntime {
   const tokenizer: EmbeddingTokenizer = {
     model_max_length: options.tokenizerLimit ?? 8,
-    encode(text, _pair, encodeOptions) {
+    encode(text, encodeOptions) {
       const contentTokens = [...text].length;
       const specialTokens = encodeOptions?.add_special_tokens === false ? 0 : 2;
       return Array.from({ length: contentTokens + specialTokens }, (_, index) => index);
@@ -141,7 +141,7 @@ test("splits on Unicode code points, keeps the tail, and never exceeds the token
 
   assert.equal(submitted.join(""), text);
   assert.ok(submitted.some((window) => window.endsWith("保留")));
-  assert.ok(submitted.every((window) => runtime.tokenizer.encode(window, null, {
+  assert.ok(submitted.every((window) => runtime.tokenizer.encode(window, {
     add_special_tokens: true,
   }).length <= 5));
   assert.ok(submitted.every((window) => !window.includes("\uFFFD")));
@@ -154,7 +154,7 @@ test("pure windowing counts added special tokens and applies the model's smaller
 
   assert.equal(windows.map((window) => window.text).join(""), "abcdefgh");
   assert.ok(windows.every((window) => window.tokenCount <= 4));
-  assert.ok(windows.every((window) => tokenizer.encode(window.text, null, {
+  assert.ok(windows.every((window) => tokenizer.encode(window.text, {
     add_special_tokens: true,
   }).length === window.tokenCount));
   assert.throws(() => splitTextIntoTokenWindows("x", tokenizer, 2), /single Unicode code point/);
@@ -271,7 +271,7 @@ test("counts E5 prefixes in every window limit but weights only body tokens", { 
   const windows = splitTextIntoTokenWindows("abcdefg", runtime.tokenizer, 14, "passage: ");
   assert.equal(windows.map((window) => window.text).join(""), "abcdefg");
   assert.ok(windows.every((window) => window.tokenCount <= 14));
-  assert.ok(windows.every((window) => runtime.tokenizer.encode(`passage: ${window.text}`, null, {
+  assert.ok(windows.every((window) => runtime.tokenizer.encode(`passage: ${window.text}`, {
     add_special_tokens: true,
   }).length === window.tokenCount));
 
@@ -291,7 +291,7 @@ test("counts E5 prefixes in every window limit but weights only body tokens", { 
   assert.ok(submitted.length > 1);
   assert.ok(submitted.every((text) => text.startsWith("passage: ")));
   assert.equal(submitted.map((text) => text.slice("passage: ".length)).join(""), "abcdefg");
-  assert.ok(submitted.every((text) => runtime.tokenizer.encode(text, null, {
+  assert.ok(submitted.every((text) => runtime.tokenizer.encode(text, {
     add_special_tokens: true,
   }).length <= 14));
   assert.ok(Math.abs(vector[0] - 3 / 5) < 1e-6);
@@ -319,6 +319,22 @@ test("cache inspection is read-only and selects a configured model directory", (
     const absolute = path.resolve(root);
     if (path.dirname(absolute) !== path.resolve(os.tmpdir()) ||
         !path.basename(absolute).startsWith("vault-mcp-model-cache-test-")) {
+      throw new Error(`Refusing to remove non-test cache path: ${absolute}`);
+    }
+    fs.rmSync(absolute, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
+test("cache inspection does not require the removed @xenova runtime to resolve", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "vault-mcp-v4-cache-test-"));
+  try {
+    const inspection = inspectEmbeddingCache("bge-small-zh", root);
+    assert.equal(inspection.available, false);
+    assert.equal(inspection.cacheDir, path.resolve(root));
+  } finally {
+    const absolute = path.resolve(root);
+    if (path.dirname(absolute) !== path.resolve(os.tmpdir()) ||
+        !path.basename(absolute).startsWith("vault-mcp-v4-cache-test-")) {
       throw new Error(`Refusing to remove non-test cache path: ${absolute}`);
     }
     fs.rmSync(absolute, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });

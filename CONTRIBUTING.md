@@ -3,7 +3,7 @@
 欢迎提供可复现的安装失败、页码错误和检索失败案例。请先搜索已有 issue；公开样例必须有再分发许可，不要上传私人知识库或本地索引。
 
 ```sh
-npm ci
+npm ci --ignore-scripts
 npm test
 npm run test:package
 npm run models:prepare

@@ -73,12 +73,15 @@ export class VaultApp {
       mode = "bm25";
       results = this.db.searchBM25(query, limit);
     }
+    const currentVersions = new Map<string, string | null>();
     results = results.map(result => {
-      try {
-        const original = result.sourceType.startsWith("pdf") ? result.originalPdf ?? result.relativePath : result.relativePath;
-        const current = sourceHash(fs.readFileSync(resolveVaultPath(this.root, original)));
-        return { ...result, stale: result.stale || current !== result.sourceVersion };
-      } catch { return { ...result, stale: true }; }
+      const original = result.sourceType.startsWith("pdf") ? result.originalPdf ?? result.relativePath : result.relativePath;
+      if (!currentVersions.has(original)) {
+        try { currentVersions.set(original, sourceHash(fs.readFileSync(resolveVaultPath(this.root, original)))); }
+        catch { currentVersions.set(original, null); }
+      }
+      const current = currentVersions.get(original);
+      return { ...result, stale: result.stale || current === null || current !== result.sourceVersion };
     });
     return { query, requestedMode, mode, results, notices };
   }
@@ -138,7 +141,7 @@ export function formatSearch(response: SearchResponse): string {
 export async function diagnose(root: string, recover = false) {
   const checks: Array<{ name: string; ok: boolean; detail: unknown; fix?: string }> = [];
   const [major, minor] = process.versions.node.split(".").map(Number);
-  checks.push({ name: "node", ok: major === 22 && minor >= 13 || major >= 24, detail: process.version, fix: "安装受支持的 Node.js 22.13+ 或 24 LTS。" });
+  checks.push({ name: "node", ok: major === 22 && minor >= 14 || major === 24, detail: process.version, fix: "安装受支持的 Node.js 22.14+ 或 24 LTS。" });
   let readable = false;
   try { fs.accessSync(root, fs.constants.R_OK); readable = fs.statSync(root).isDirectory(); } catch {}
   checks.push({ name: "directory", ok: readable, detail: root, fix: "确认 --path 指向已存在、当前用户可读取的资料目录。" });
@@ -153,7 +156,10 @@ export async function diagnose(root: string, recover = false) {
     try {
       app = new VaultApp(root);
       checks.push({ name: "index", ok: true, detail: app.stats() });
-      const cache = inspectEmbeddingCache(app.db.getEmbeddingProfile());
+      const embeddingsDisabled = process.env.VAULT_EMBEDDINGS === "off";
+      const cache = embeddingsDisabled
+        ? { available: true, required: false, disabled: true }
+        : { ...inspectEmbeddingCache(app.db.getEmbeddingProfile()), required: true, disabled: false };
       checks.push({ name: "model-cache", ok: cache.available, detail: cache,
         fix: "首次联网运行 index 下载模型；缓存完成后使用 --offline。仅关键词模式使用 --no-embeddings。" });
     } catch (error) {

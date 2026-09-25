@@ -39,6 +39,18 @@ test("CLI indexes text/PDF, reads citations, enforces lock and explicitly import
     assert.equal(status.embedding.profile, "multilingual-e5-small");
     assert.equal(status.totalDocuments, 2);
     assert.equal(status.pdfReady, 1);
+    const lexicalDoctor = JSON.parse(invoke(["doctor", "--no-embeddings"]).stdout);
+    assert.equal(lexicalDoctor.ok, true);
+    const lexicalModelCheck = lexicalDoctor.checks.find((c: any) => c.name === "model-cache");
+    assert.equal(lexicalModelCheck.ok, true);
+    assert.equal(lexicalModelCheck.detail.required, false);
+    assert.equal(lexicalModelCheck.detail.disabled, true);
+
+    r = invoke(["import", "--pdf", "paper.pdf", "--profile", "bge-small-zh"]);
+    assert.equal(r.status, 1, "import must reject --profile before opening the writer");
+    assert.match(JSON.parse(r.stdout).error, /index --profile/);
+    assert.equal(JSON.parse(invoke(["status"]).stdout).embedding.profile, "multilingual-e5-small",
+      "invalid import must leave the persisted embedding profile unchanged");
     r = invoke(["search", "secondpage"]);
     const match = JSON.parse(r.stdout).results[0];
     assert.equal(match.pageStart, 2);

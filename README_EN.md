@@ -2,7 +2,7 @@
 
 **Ask in Chinese, find evidence in English and Chinese papers, notes and code, and verify the original source.** Local research retrieval through MCP and the CLI.
 
-[![CI](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml) ![Node](https://img.shields.io/badge/Node-22.13%2B%20%7C%2024-green) ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-CI-blue)
+[![CI](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml) ![Node](https://img.shields.io/badge/Node-22.14%2B%20%7C%2024-green) ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-CI-blue)
 
 English · [简体中文](README.md) · [One-minute recorded demo](docs/DEMO.md) · [Measurements and failures](docs/BENCHMARK_RESULTS.md) · [Join the preview](docs/TRYOUT.md)
 
@@ -12,22 +12,24 @@ English · [简体中文](README.md) · [One-minute recorded demo](docs/DEMO.md)
 
 ## Try it
 
-Use Node.js 22.13+ or 24 LTS. Normal use requires no Python, Docker or GPU. Install the preview tarball directly from GitHub Releases:
+Use Node.js 22.14+ or 24 LTS. Normal use requires no Python, Docker or GPU. Install the preview tarball directly from GitHub Releases:
 
 ```sh
-npm install -g https://github.com/yao982/vault-mcp/releases/download/v0.3.0-preview.1/vault-mcp-0.3.0-preview.1.tgz
+npm install -g --ignore-scripts https://github.com/yao982/vault-mcp/releases/download/v0.3.0-preview.1/vault-mcp-0.3.0-preview.1.tgz
 vault-mcp index --path ./my-research
 vault-mcp search "GPflow 与 GPy 的核心计算依赖有什么不同？" --path ./my-research
 ```
 
 The first run downloads the local embedding model; download time is separate from indexing. To check installation without a model, use `index --no-embeddings` and `search --mode bm25`. Cross-language retrieval needs multilingual embeddings.
 
+Keep `--ignore-scripts`: the dependencies include prebuilt binaries, and this avoids npm incorrectly attempting a SQLite source build on Windows. [Installation details](docs/UPGRADING.md)
+
 A runnable sample contains the real, licensed GPflow paper, a Chinese reading note and teaching code:
 
 ```sh
 git clone https://github.com/yao982/vault-mcp.git
 cd vault-mcp
-npm ci
+npm ci --ignore-scripts
 npm run build
 node dist/index.js index --path ./sample_vault
 node dist/index.js search "GPflow 与 GPy 的核心计算依赖有什么不同？" --path ./sample_vault
@@ -84,7 +86,7 @@ No default telemetry or document upload. An MCP client may send returned passage
 
 ## Evaluation and contribution
 
-The [public benchmark](benchmarks/README.md) contains 10 licensed real papers and 50 frozen Chinese questions, with paper-disjoint development and held-out splits. Keyword, vector, hybrid and QMD comparisons use the same extraction. Citation validation is separate from retrieval scoring. See [actual results, hardware, scope and failures](docs/BENCHMARK_RESULTS.md).
+The [public benchmark](https://github.com/yao982/vault-mcp/blob/main/benchmarks/README.md) contains 10 licensed real papers and 50 frozen Chinese questions, with paper-disjoint development and held-out splits. Keyword, vector, hybrid and QMD comparisons use the same extraction. Citation validation is separate from retrieval scoring. See [actual results, hardware, scope and failures](docs/BENCHMARK_RESULTS.md).
 
 ```sh
 npm test
@@ -99,4 +101,4 @@ CI targets Windows, Linux and macOS on Node 22/24 for regression/build/package i
 
 A lightweight UI is deferred until at least three trial users independently report CLI-resistant import-status or source-preview problems. OCR, reranking and shared services require evidence from parsing failures, retrieval misses and multi-client needs.
 
-Code: [MIT](LICENSE). Papers retain their [CC BY 4.0 attribution](benchmarks/corpus/ATTRIBUTION.md). The [changelog](CHANGELOG.md) preserves v0.1 and v0.2 history.
+Code: [MIT](LICENSE). Papers retain their [CC BY 4.0 attribution](https://github.com/yao982/vault-mcp/blob/main/benchmarks/corpus/ATTRIBUTION.md). The [changelog](CHANGELOG.md) preserves v0.1 and v0.2 history.

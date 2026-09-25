@@ -2,7 +2,7 @@
 
 **让中文问题找到中英文论文、笔记和代码中的证据，并回到原文核对。** 本地运行，MCP + 命令行，面向科研学习者。
 
-[![CI](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml) ![Node](https://img.shields.io/badge/Node-22.13%2B%20%7C%2024-green) ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-CI-blue)
+[![CI](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml) ![Node](https://img.shields.io/badge/Node-22.14%2B%20%7C%2024-green) ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-CI-blue)
 
 简体中文 · [English](README_EN.md) · [一分钟真实演示](docs/DEMO.md) · [实测与失败案例](docs/BENCHMARK_RESULTS.md) · [参与试用](docs/TRYOUT.md)
 
@@ -12,22 +12,24 @@
 
 ## 一分钟上手
 
-需要 Node.js 22.13+ 或 24 LTS；日常使用不需要 Python、Docker 或 GPU。预览版从 GitHub Release 安装，不依赖 npm 账号：
+需要 Node.js 22.14+ 或 24 LTS；日常使用不需要 Python、Docker 或 GPU。预览版从 GitHub Release 安装，不依赖 npm 账号：
 
 ```sh
-npm install -g https://github.com/yao982/vault-mcp/releases/download/v0.3.0-preview.1/vault-mcp-0.3.0-preview.1.tgz
+npm install -g --ignore-scripts https://github.com/yao982/vault-mcp/releases/download/v0.3.0-preview.1/vault-mcp-0.3.0-preview.1.tgz
 vault-mcp index --path "你的资料目录"
 vault-mcp search "GPflow 与 GPy 的核心计算依赖有什么不同？" --path "你的资料目录"
 ```
 
 首次索引会下载本地模型；下载时间单独计算。没有模型也可先用 `index --no-embeddings` 和 `search --mode bm25` 验证安装，但中文问题检索英文资料需要多语言向量能力。
 
+安装命令中的 `--ignore-scripts` 使用依赖自带的预编译文件，避开 npm 在 Windows 上错误触发 SQLite 源码构建的问题；请保留此参数。[安装说明](docs/UPGRADING.md)
+
 还没有适合的资料？仓库附带带许可的真实 GPflow 论文、中文阅读笔记和代码：
 
 ```sh
 git clone https://github.com/yao982/vault-mcp.git
 cd vault-mcp
-npm ci
+npm ci --ignore-scripts
 npm run build
 node dist/index.js index --path ./sample_vault
 node dist/index.js search "GPflow 与 GPy 的核心计算依赖有什么不同？" --path ./sample_vault
@@ -88,7 +90,7 @@ PDF 逐页处理，记录等待、处理、完成、无文字和失败。失败�
 
 ## 评测、贡献和路线
 
-[公开评测](benchmarks/README.md)：10 篇许可核实的真实论文，50 个冻结中文问题，开发集/留出集按论文分离；关键词、向量、混合与 QMD 使用相同提取文本比较。PDF 页码/段落核验独立于检索评分。[结果、配置、硬件、范围与失败](docs/BENCHMARK_RESULTS.md)。
+[公开评测](https://github.com/yao982/vault-mcp/blob/main/benchmarks/README.md)：10 篇许可核实的真实论文，50 个冻结中文问题，开发集/留出集按论文分离；关键词、向量、混合与 QMD 使用相同提取文本比较。PDF 页码/段落核验独立于检索评分。[结果、配置、硬件、范围与失败](docs/BENCHMARK_RESULTS.md)。
 
 ```sh
 npm test
@@ -103,4 +105,4 @@ CI 覆盖 Windows、Linux、macOS 的 Node 22/24 构建、回归和安装包；�
 
 下一步由真实问题驱动：至少 3 位试用者独立遇到 CLI 难以解决的导入状态或出处预览问题，才启动轻量界面；OCR、重排序和共享服务分别依据解析失败、检索失误和多客户端需求决定。
 
-代码 [MIT](LICENSE)；示例论文与评测论文遵循各自 [CC BY 4.0 署名](benchmarks/corpus/ATTRIBUTION.md)。[更新记录](CHANGELOG.md)保留 0.1、0.2 历史。
+代码 [MIT](LICENSE)；示例论文与评测论文遵循各自 [CC BY 4.0 署名](https://github.com/yao982/vault-mcp/blob/main/benchmarks/corpus/ATTRIBUTION.md)。[更新记录](CHANGELOG.md)保留 0.1、0.2 历史。

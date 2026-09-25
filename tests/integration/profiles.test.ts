@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { env } from "@xenova/transformers";
+import { env } from "@huggingface/transformers";
 import { EmbeddingService } from "../../src/storage/embedding.js";
 import { EMBEDDING_PROFILES, inspectEmbeddingCache } from "../../src/storage/profiles.js";
 

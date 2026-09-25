@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: npm-shrinkwrap.json
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm test
         env:
           VAULT_OFFLINE: '1'
@@ -45,8 +45,12 @@ jobs:
         with:
           path: .cache/models
           key: vault-models-bge-e5-v1
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run models:prepare
       - run: npm run test:integration
         env:
           VAULT_OFFLINE: '1'
+      - run: npm run test:package
+        env:
+          VAULT_OFFLINE: '1'
+          VAULT_PACKAGE_MODEL_TEST: '1'

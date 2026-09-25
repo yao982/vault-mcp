@@ -5,6 +5,7 @@ import path from "node:path";
 import test, { type TestContext } from "node:test";
 import { PDFDocument } from "pdf-lib";
 import { VaultIndexer, type EmbeddingProvider } from "../src/indexer.js";
+import { validateImportManifest } from "../src/parser/imports.js";
 import { extractPdfPages } from "../src/parser/pdf.js";
 import { VaultDatabase } from "../src/storage/db.js";
 
@@ -280,4 +281,27 @@ test("explicit Markdown import splits chunks at mapped pages, keeps sibling note
   assert.equal(reopened.getDocumentSourceState("paper.pdf")?.stale, true);
   assert.equal(reopened.getPdfState("paper.pdf")?.status, "failed");
   assert.match(reopened.getPdfPages("paper.pdf").map((page) => page.text).join(" "), /beta mapped evidence/);
+});
+
+test("manifest path validation accepts a canonicalized vault-root alias", (t) => {
+  const vault = createVault(t);
+  fs.writeFileSync(path.join(vault.root, "paper.pdf"), "pdf placeholder");
+  fs.writeFileSync(path.join(vault.root, "paper.md"), "converted placeholder");
+  const alias = `${vault.root}-alias`;
+  try {
+    fs.symlinkSync(vault.root, alias, process.platform === "win32" ? "junction" : "dir");
+  } catch (error) {
+    t.skip(`Directory symlink is unavailable in this environment: ${error instanceof Error ? error.message : error}`);
+    return;
+  }
+
+  try {
+    assert.deepEqual(validateImportManifest(alias, {
+      version: 1,
+      documents: [{ pdf: "paper.pdf", markdown: "paper.md" }],
+    }), { version: 1, documents: [{ pdf: "paper.pdf", markdown: "paper.md" }] });
+  } finally {
+    if (process.platform === "win32") fs.rmdirSync(alias);
+    else fs.unlinkSync(alias);
+  }
 });

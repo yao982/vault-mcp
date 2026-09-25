@@ -35,7 +35,7 @@ const profiles: Record<EmbeddingProfileName, EmbeddingProfile> = {
     dimensions: 512,
     queryPrefix: "",
     documentPrefix: "",
-    fingerprint: "bge-small-zh|Xenova/bge-small-zh-v1.5|cls|512||norm=l2-weighted|window=unicode-codepoint-recursive|weight=body-effective-tokens|quantized=true",
+    fingerprint: "bge-small-zh|Xenova/bge-small-zh-v1.5|cls|512||norm=l2-weighted|window=unicode-codepoint-recursive|weight=body-effective-tokens|dtype=q8|device=cpu|runtime=@huggingface/transformers@4.3.0|onnxruntime-node@1.30.0",
   },
   "multilingual-e5-small": {
     name: "multilingual-e5-small",
@@ -44,7 +44,7 @@ const profiles: Record<EmbeddingProfileName, EmbeddingProfile> = {
     dimensions: 384,
     queryPrefix: "query: ",
     documentPrefix: "passage: ",
-    fingerprint: "multilingual-e5-small|Xenova/multilingual-e5-small|mean|384|query: |passage: |norm=l2-weighted|window=unicode-codepoint-recursive|weight=body-effective-tokens|quantized=true",
+    fingerprint: "multilingual-e5-small|Xenova/multilingual-e5-small|mean|384|query: |passage: |norm=l2-weighted|window=unicode-codepoint-recursive|weight=body-effective-tokens|dtype=q8|device=cpu|runtime=@huggingface/transformers@4.3.0|onnxruntime-node@1.30.0",
   },
 };
 
@@ -84,8 +84,10 @@ export function inspectEmbeddingCache(
     };
   }
 
-  const legacyCacheDir = getLegacyTransformersCacheDir();
-  if (path.resolve(legacyCacheDir) !== preferredCacheDir && hasCachedModel(legacyCacheDir, profile.modelId)) {
+  const legacyCacheDir = getLegacyTransformersCacheDirs().find(
+    (candidate) => path.resolve(candidate) !== preferredCacheDir && hasCachedModel(candidate, profile.modelId)
+  );
+  if (legacyCacheDir) {
     return {
       profile: profile.name,
       modelId: profile.modelId,
@@ -116,7 +118,53 @@ function hasCachedModel(cacheDir: string, modelId: string): boolean {
   );
 }
 
-function getLegacyTransformersCacheDir(): string {
-  const modulePath = fileURLToPath(import.meta.resolve("@xenova/transformers"));
-  return path.resolve(path.dirname(path.dirname(modulePath)), ".cache");
+function getLegacyTransformersCacheDirs(): string[] {
+  const candidates = new Set<string>();
+
+  // Prefer the path from an installed v2 package when it is still resolvable.
+  // The package may be absent after upgrading, while its old cache directory
+  // can still exist, so also derive the old locations from this package root.
+  try {
+    const modulePath = fileURLToPath(import.meta.resolve("@xenova/transformers"));
+    candidates.add(path.resolve(path.dirname(path.dirname(modulePath)), ".cache"));
+  } catch {
+    // Missing @xenova/transformers is expected after upgrading to v4.
+  }
+
+  const startDir = path.dirname(fileURLToPath(import.meta.url));
+  const packageRoot = findVaultPackageRoot(startDir);
+  if (packageRoot) {
+    candidates.add(path.join(packageRoot, "node_modules", "@xenova", "transformers", ".cache"));
+  }
+
+  // npm can hoist the old runtime to an ancestor node_modules directory.
+  let currentDir = startDir;
+  while (true) {
+    if (path.basename(currentDir) === "node_modules") {
+      candidates.add(path.join(currentDir, "@xenova", "transformers", ".cache"));
+    }
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) break;
+    currentDir = parentDir;
+  }
+
+  return [...candidates];
+}
+
+function findVaultPackageRoot(startDir: string): string | undefined {
+  let currentDir = startDir;
+  while (true) {
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(path.join(currentDir, "package.json"), "utf8")) as {
+        name?: unknown;
+      };
+      if (packageJson.name === "vault-mcp") return currentDir;
+    } catch {
+      // Keep walking through source/output directories.
+    }
+
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) return undefined;
+    currentDir = parentDir;
+  }
 }

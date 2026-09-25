@@ -12,7 +12,7 @@
 - npm 安装包、依赖 shrinkwrap、Windows/Linux/macOS × Node 22/24 CI、独立真实模型验证。
 - 10 篇 CC BY 4.0 真实论文、50 个冻结中文问题、可复现检索和性能评测、公开试用反馈模板。实际运行结果见 [评测报告](docs/BENCHMARK_RESULTS.md)，不把候选措辞作为可靠拒答能力。
 
-升级前停止旧服务。新库推荐 Node 22.13+ 或 24。原始资料保持不变；详见 [升级说明](docs/UPGRADING.md)。
+升级前停止旧服务。新库推荐 Node 22.14+ 或 24。原始资料保持不变；详见 [升级说明](docs/UPGRADING.md)。
 
 Research preview with a shared CLI/MCP service, native PDF page citations, explicit converted-text imports, multilingual E5 profiles, writer locking, reproducible evaluation and installable release tarballs. Human trials are still pending; this is not the stable 0.3.0 release.
 

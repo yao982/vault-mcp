@@ -1,5 +1,15 @@
 # 从 0.1 / 0.2 升级
 
+## 运行环境与安装
+
+使用 Node.js 22.14+ 或 24 LTS。SQLite 依赖使用 Node-API 10，其最低 Node 22 版本为 22.14（[Node 官方版本表](https://nodejs.org/api/n-api.html#node-api-version-matrix)）。
+
+Release 安装保留 `npm install -g --ignore-scripts <压缩包 URL>`；源码安装使用 `npm ci --ignore-scripts` 后显式运行 `npm run build`。此版本的依赖自带预编译文件，跳过安装脚本可避免 Windows 上 npm 错误触发 `better-sqlite3` 的 `node-gyp rebuild`，无需额外安装 Python 或 Visual Studio。上游记录：[better-sqlite3 #1516](https://github.com/WiseLibs/better-sqlite3/issues/1516)、[npm #9837](https://github.com/npm/cli/issues/9837)。CI 与独立安装包测试使用同一命令。不要省略可选依赖，它们包含平台原生组件。
+
+Use Node.js 22.14+ or 24 LTS and retain `--ignore-scripts` when installing this preview. Source installs then run `npm run build` explicitly. Bundled prebuilt dependencies are used; do not omit optional dependencies. This avoids the upstream Windows npm/node-gyp issue linked above.
+
+## 迁移步骤
+
 1. 停止所有指向同一知识库的旧 MCP 服务。0.2 及以前没有新写锁，不能识别 0.3 服务正在写入。
 2. 如需回退，停止服务后备份 `.vault_index.db` 及存在的 WAL/SHM 辅助文件。原始论文和笔记不需要移动。
 3. 安装预览版，然后运行 `vault-mcp index --path "知识库"`。数据库会增量迁移，旧派生向量会重建。
