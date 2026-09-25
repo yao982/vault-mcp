@@ -1,4 +1,4 @@
-# Vault-MCP 0.5.0
+# Vault-MCP 0.2.0
 
 本地知识库 MCP 服务：SQLite 关键词检索、本地向量、RRF 候选排序、大纲分块和 PDF 路径关联。
 

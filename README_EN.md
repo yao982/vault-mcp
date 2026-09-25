@@ -1,4 +1,4 @@
-# Vault-MCP 0.5.0
+# Vault-MCP 0.2.0
 
 A local knowledge base MCP server with SQLite keyword retrieval, local embeddings, RRF candidate ranking, outline-aware chunks, and PDF path references.
 

@@ -40,7 +40,7 @@ test("MCP handshake, bounded reads, keyword mode and actual watcher lifecycle", 
     await client.connect(transport);
     assert.deepEqual((await client.listTools()).tools.map(t => t.name).sort(),
       ["get_vault_stats", "ping_vault", "read_vault_file", "search_vault"]);
-    assert.match(extractText(await call("ping_vault")), /0\.5\.0/);
+    assert.match(extractText(await call("ping_vault")), /0\.2\.0/);
     await until(async () => (await stats()).indexing.state === "ready", "initial indexing");
     assert.equal((await stats()).embedding.state, "disabled");
     const result = extractText(await call("search_vault", { query: "自适应控制" }));

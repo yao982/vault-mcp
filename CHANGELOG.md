@@ -1,8 +1,8 @@
 # 更新记录 / Changelog
 
-## 0.5.0 — 2026-09-25
+## 0.2.0 — 2026-09-25
 
-本次版本集中修复读取边界、索引一致性和检索可靠性，保留四个 MCP 工具。GitHub 原发布标签为 `v0.4.0`，但其代码版本为 `0.1.0`；本次统一 package、MCP 服务与文档版本为 `0.5.0`，原有标签保持不变。
+本次版本集中修复读取边界、索引一致性和检索可靠性，保留四个 MCP 工具。初版为 `v0.1.0`，本次修复版为 `v0.2.0`；GitHub Release、标签、package、MCP 服务及文档采用一致的版本编号。
 
 ### 主要改动
 
@@ -33,3 +33,9 @@ PDF 仍仅关联路径；向量检索仍遍历存储向量；无关查询可能�
 This release fixes vault path enforcement, stale indexing writes, offline deletions, vector/chunk alignment, Chinese keyword retrieval, and long-text embedding coverage. It adds index reuse and migration, shared model initialization with retry backoff, keyword-only and cached-model modes, background indexing status, and regression coverage. The four MCP tools remain available.
 
 Stop older servers before upgrading, use Node.js >= 22, install dependencies, rebuild, and restart the client. The derived index migrates automatically. Validation was performed on Windows with Node.js v24.15.0: 34 regression tests and 2 real cached-model integration tests passed. Small-fixture retrieval results are not a general accuracy guarantee. PDFs remain path references; returned passages may be sent to a cloud model by the consuming client.
+
+## 0.1.0 — 2026-09-25
+
+初始版本，提供本地关键词与向量混合检索、Markdown 分块、PDF 路径关联及文件监听。本节记录原始版本；后续安全、一致性和检索修复见 0.2.0。
+
+Initial release with local hybrid retrieval, Markdown chunking, PDF path references, and file watching. See 0.2.0 for subsequent safety, consistency, and retrieval fixes.

@@ -1,6 +1,6 @@
 {
   "name": "vault-mcp",
-  "version": "0.5.0",
+  "version": "0.2.0",
   "description": "Local knowledge base MCP server for Cursor and VS Code with Markdown, academic papers and code search",
   "type": "module",
   "main": "dist/index.js",
