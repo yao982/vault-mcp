@@ -1,0 +1,20 @@
+name: Bug report / 问题报告
+description: Reproducible installation, indexing, citation or retrieval failure
+body:
+  - type: input
+    id: environment
+    attributes:
+      label: OS, Node and Vault-MCP versions
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Commands, expected result, actual result
+      description: Include a minimal public example if permitted. Remove private paths, documents and secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnosis
+    attributes:
+      label: Relevant doctor output / 诊断结果

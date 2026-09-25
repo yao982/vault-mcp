@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const SUPPORTED_EXTS = new Set([
-  ".md", ".markdown", ".txt", ".c", ".h", ".cpp", ".py", ".js", ".ts", ".m",
+  ".md", ".markdown", ".txt", ".c", ".h", ".cpp", ".py", ".js", ".ts", ".m", ".pdf",
 ]);
 const IGNORED_DIRS = new Set([
   "node_modules", "images", "assets", "_assets", "dist", "build", "slprj", "model",

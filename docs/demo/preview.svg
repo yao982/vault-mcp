@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="440" viewBox="0 0 1120 440" role="img" aria-labelledby="title desc">
+  <title id="title">Vault-MCP: 中文提问，核对英文论文第 2 页</title>
+  <desc id="desc">实际 CLI 录制的摘要：查询 GPflow 与 GPy 核心计算依赖，第一条候选为 GPflow 论文物理第 2 页；读取同页核对 TensorFlow 与 numeric Python。</desc>
+  <rect width="1120" height="440" rx="16" fill="#0d1b24"/>
+  <path d="M16 0h1088a16 16 0 0 1 16 16v32H0V16A16 16 0 0 1 16 0" fill="#1b303c"/>
+  <g fill="#aec9d6"><circle cx="25" cy="24" r="5"/><circle cx="44" cy="24" r="5"/><circle cx="63" cy="24" r="5"/></g>
+  <g font-family="Consolas, 'Noto Sans CJK SC', 'Microsoft YaHei', monospace" font-size="18">
+    <text x="92" y="31" fill="#bce5c1">Vault-MCP · real CLI recording · v0.3.0 preview</text>
+    <text x="32" y="89" fill="#bce5c1">$ vault-mcp search "GPflow 与 GPy 的核心计算依赖有什么不同？"</text>
+    <text x="32" y="133" fill="#ffffff" font-size="23">候选 1  ·  papers/gpflow.pdf  ·  第 2 页（物理页）</text>
+    <text x="32" y="168" fill="#b0c4ce">来源版本 SHA-256: 7278a2c6560bbd13…</text>
+    <text x="32" y="210" fill="#bce5c1">$ vault-mcp read papers/gpflow.pdf --start-page 2 --end-page 2</text>
+    <text x="32" y="252" fill="#f1f4f5">“GPflow uses TensorFlow for its core computations</text>
+    <text x="32" y="284" fill="#f1f4f5"> rather than numeric Python.”</text>
+    <text x="32" y="336" fill="#aec9d6">GPflow · JMLR 2017 · CC BY 4.0 · 原始记录与完整输出可下载</text>
+    <text x="32" y="392" fill="#bce5c1">▶ 一分钟：中文检索 → 原文核对 → 加入个人笔记</text>
+  </g>
+</svg>

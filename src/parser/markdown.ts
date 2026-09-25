@@ -3,6 +3,8 @@ export interface MarkdownChunk {
   startLine: number;   // 切片起始行号 (1-based)
   endLine: number;     // 切片结束行号
   content: string;     // 切片正文（包含 LaTeX 公式与代码块）
+  pageStart?: number;  // PDF来源的物理起始页（1-based），普通Markdown省略
+  pageEnd?: number;    // PDF来源的物理结束页（1-based），普通Markdown省略
 }
 
 /**

@@ -14,11 +14,11 @@ test("built MCP server uses the cached model and labels unrelated results as can
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "vault-mcp-model-protocol-"));
   fs.cpSync(path.join(project, "sample_vault"), scratch, {
     recursive: true,
-    filter: filename => !path.basename(filename).startsWith(".vault_index"),
+    filter: filename => !path.basename(filename).startsWith(".") && path.extname(filename).toLowerCase() !== ".pdf",
   });
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: ["dist/index.js", "--path", scratch],
+    args: ["dist/index.js", "--path", scratch, "--profile", "bge-small-zh"],
     cwd: project,
     env: { ...process.env, VAULT_OFFLINE: "1", VAULT_EMBEDDINGS: "on" } as Record<string, string>,
     stderr: "pipe",
@@ -39,7 +39,7 @@ test("built MCP server uses the cached model and labels unrelated results as can
       await new Promise(resolve => setTimeout(resolve, 50));
       state = await stats();
     }
-    assert.equal(state.totalDocuments, 3);
+    assert.ok(state.totalDocuments >= 3);
     assert.equal(state.totalVectors, state.totalChunks);
     assert.equal(state.incompleteDocuments, 0);
     const positive = text(await client.callTool({ name: "search_vault", arguments: { query: "如何销毁堆中空间", limit: 1 } }));

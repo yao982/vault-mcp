@@ -6,6 +6,8 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { PDFDocument } from "pdf-lib";
+import { SERVER_VERSION } from "../src/config.js";
 
 const project = fileURLToPath(new URL("..", import.meta.url));
 const extractText = (result: any): string => result.content.filter((c: any) => c.type === "text").map((c: any) => c.text).join("\n");
@@ -40,7 +42,7 @@ test("MCP handshake, bounded reads, keyword mode and actual watcher lifecycle", 
     await client.connect(transport);
     assert.deepEqual((await client.listTools()).tools.map(t => t.name).sort(),
       ["get_vault_stats", "ping_vault", "read_vault_file", "search_vault"]);
-    assert.match(extractText(await call("ping_vault")), /0\.2\.0/);
+    assert.ok(extractText(await call("ping_vault")).includes(SERVER_VERSION));
     await until(async () => (await stats()).indexing.state === "ready", "initial indexing");
     assert.equal((await stats()).embedding.state, "disabled");
     const result = extractText(await call("search_vault", { query: "自适应控制" }));
@@ -63,11 +65,22 @@ test("MCP handshake, bounded reads, keyword mode and actual watcher lifecycle", 
     await until(async () => (await stats()).totalDocuments === 2, "watcher add");
     fs.writeFileSync(file, "# uniquechangetoken\n第二次内容");
     await until(async () => extractText(await call("search_vault", { query: "uniquechangetoken" })).includes("dynamic.md"), "watcher change");
-    // PDF association should also update without editing the Markdown.
-    fs.writeFileSync(path.join(vault, "dynamic.pdf"), "%PDF fixture for path binding only");
-    await until(async () => (await stats()).totalTwinPdfs === 1, "PDF association add");
+    // A same-name personal note is independent of the native PDF body.
+    const pdf = await PDFDocument.create();
+    pdf.addPage().drawText("Physical first page searchablepdfcanary");
+    pdf.addPage().drawText("Physical second page citationproof");
+    fs.writeFileSync(path.join(vault, "dynamic.pdf"), await pdf.save());
+    await until(async () => (await stats()).pdfReady === 1, "PDF extraction add");
+    assert.equal((await stats()).totalDocuments, 3);
+    const pdfResult = await call("search_vault", { query: "citationproof" });
+    assert.equal((pdfResult.structuredContent as any).results[0].pageStart, 2);
+    assert.equal((pdfResult.structuredContent as any).results[0].sourceType, "pdf");
+    const page = await call("read_vault_file", { relative_path: "dynamic.pdf", start_page: 2, end_page: 2 });
+    assert.match(extractText(page), /Physical second page/);
+    assert.doesNotMatch(extractText(page), /Physical first page/);
+    assert.equal((await call("read_vault_file", { relative_path: "dynamic.pdf", start_page: 2, start_line: 1 })).isError, true);
     fs.unlinkSync(path.join(vault, "dynamic.pdf"));
-    await until(async () => (await stats()).totalTwinPdfs === 0, "PDF association removal");
+    await until(async () => (await stats()).totalPdfDocuments === 0, "PDF removal");
     fs.unlinkSync(file);
     await until(async () => (await stats()).totalDocuments === 1, "watcher deletion");
     assert.doesNotMatch(extractText(await call("search_vault", { query: "uniquechangetoken" })), /dynamic\.md/);

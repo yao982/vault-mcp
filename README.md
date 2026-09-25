@@ -1,86 +1,106 @@
-# Vault-MCP 0.2.0
+# Vault-MCP
 
-本地知识库 MCP 服务：SQLite 关键词检索、本地向量、RRF 候选排序、大纲分块和 PDF 路径关联。
+**让中文问题找到中英文论文、笔记和代码中的证据，并回到原文核对。** 本地运行，MCP + 命令行，面向科研学习者。
 
-[English](./README_EN.md) | 简体中文 | [更新记录](./CHANGELOG.md)
+[![CI](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yao982/vault-mcp/actions/workflows/ci.yml) ![Node](https://img.shields.io/badge/Node-22.13%2B%20%7C%2024-green) ![Platforms](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-CI-blue)
 
-Vault-MCP 将 Markdown 笔记、论文转换文本和源代码提供给支持 MCP 的客户端。索引和向量计算在本机完成，不需要云端 Embedding API。**客户端收到的原文片段可能被发送给其使用的云端 AI；本地检索不等于整个问答流程不出设备。**
+简体中文 · [English](README_EN.md) · [一分钟真实演示](docs/DEMO.md) · [实测与失败案例](docs/BENCHMARK_RESULTS.md) · [参与试用](docs/TRYOUT.md)
 
-## 安装与启动
+[![真实 CLI 记录：中文提问，返回英文论文第 2 页](docs/demo/preview.svg)](docs/DEMO.md)
 
-需要 Node.js **>= 22** 及 npm。
+**当前为 v0.3.0-preview.1。** 正在公开征集首批 5 名试用者；正式版需达到检索、出处、平台安装和真实试用门槛。Star 是反馈，能否找到可靠证据才是验收标准。
 
-```bash
+## 一分钟上手
+
+需要 Node.js 22.13+ 或 24 LTS；日常使用不需要 Python、Docker 或 GPU。预览版从 GitHub Release 安装，不依赖 npm 账号：
+
+```sh
+npm install -g https://github.com/yao982/vault-mcp/releases/download/v0.3.0-preview.1/vault-mcp-0.3.0-preview.1.tgz
+vault-mcp index --path "你的资料目录"
+vault-mcp search "GPflow 与 GPy 的核心计算依赖有什么不同？" --path "你的资料目录"
+```
+
+首次索引会下载本地模型；下载时间单独计算。没有模型也可先用 `index --no-embeddings` 和 `search --mode bm25` 验证安装，但中文问题检索英文资料需要多语言向量能力。
+
+还没有适合的资料？仓库附带带许可的真实 GPflow 论文、中文阅读笔记和代码：
+
+```sh
 git clone https://github.com/yao982/vault-mcp.git
 cd vault-mcp
-npm install
+npm ci
 npm run build
-node dist/index.js --path "你的知识库绝对路径"
+node dist/index.js index --path ./sample_vault
+node dist/index.js search "GPflow 与 GPy 的核心计算依赖有什么不同？" --path ./sample_vault
+node dist/index.js read papers/gpflow.pdf --start-page 2 --end-page 2 --path ./sample_vault
 ```
 
-正常使用时由 MCP 客户端启动上述命令；stdio 中的标准输出用于协议，诊断日志写入标准错误。客户端界面及配置文件位置取决于其版本，下面给出通用命令配置示例：
+最后一条命令读取 **PDF 物理第 2 页**，其中包含可核对的原文：
 
-```json
-{
-  "mcpServers": {
-    "vault-mcp": {
-      "command": "node",
-      "args": ["D:/tools/vault-mcp/dist/index.js", "--path", "D:/notes"],
-      "env": {
-        "VAULT_OFFLINE": "1"
-      }
-    }
-  }
-}
+> An important difference between GPflow and GPy is that GPflow uses TensorFlow for its core computations rather than numeric Python.
+
+出处：[GPflow 官方论文](https://jmlr.org/papers/volume18/16-537/16-537.pdf)，物理第 2 页，[CC BY 4.0 与署名](sample_vault/ATTRIBUTION.md)。实际搜索结果还包含 `sourceVersion`（源文件 SHA-256）、`citationId`、`pageStart`/`pageEnd`；笔记和代码保留行号。排序分是候选排序依据，不是答案正确率。
+
+## 适合什么场景
+
+- 用中文问题查英文论文，再按页核对原文。
+- 同时查论文、自己的中文阅读笔记和实验代码。
+- 给 MCP 客户端提供本地证据，也可以直接在终端搜索并输出 JSON。
+
+普通 PDF 直接提取文字。扫描件需先用外部 OCR 转换，再[显式导入 Markdown 和页映射](docs/IMPORTS.md)；没有可靠映射时显示“页码未知”。不会因为同名就把阅读笔记当成论文副本。
+
+## 命令和 MCP
+
+| 命令 | 用途 |
+|---|---|
+| `serve --path <目录>` | 启动 stdio MCP 服务；省略命令时保持旧启动方式 |
+| `index --path <目录>` | 扫描、提取 PDF、增量更新索引 |
+| `search "问题" --path <目录>` | 混合检索；支持 `--mode bm25\|vector\|hybrid`、`--limit 5` |
+| `read <相对文件> --path <目录>` | 文本用 `--start-line`/`--end-line`；PDF 用 `--start-page`/`--end-page` |
+| `status --path <目录>` | 只读统计、PDF 状态和模型配置 |
+| `doctor --path <目录>` | 检查环境、权限、缓存、索引和占用，并给出修复指引 |
+| `import --pdf … --markdown … --path <目录>` | 显式关联外部转换结果，可加 `--page-map pages.json` |
+
+除 `serve` 外可加 `--json`。MCP 保留四工具及原文本行范围参数，搜索/读取新增结构化结果与 PDF 页码。参见[客户端配置与重启](docs/CLIENTS.md)。
+
+## 本地模型与离线使用
+
+新库默认 **multilingual-e5-small**：384 维，mean pooling，`query: ` / `passage: ` 前缀，归一化。旧库保留 BGE-small-zh：512 维、CLS。长输入按实际 tokenizer 计数分窗，正文 token 加权聚合，窗口包含前缀和特殊 token；不把字符数当 token 数。
+
+```sh
+vault-mcp index --path ./my-vault --profile multilingual-e5-small
+vault-mcp search "你的问题" --path ./my-vault --offline
+vault-mcp doctor --path ./my-vault
 ```
 
-将两个路径替换为实际绝对路径。示例启用缓存模式；首次需要下载模型时，请先移除 `VAULT_OFFLINE`，允许模型下载并准备缓存。
+切换模型使旧向量失效并重建，禁止混合不兼容向量。缓存默认在用户目录 `.cache/vault-mcp/transformers`，可用 `VAULT_MODEL_CACHE` 指定可写目录；兼容读取旧 transformers 缓存。`VAULT_OFFLINE=1` / `--offline` 禁止模型下载；`VAULT_EMBEDDINGS=off` / `--no-embeddings` 使用纯关键词模式。
 
-| 环境变量 | 行为 |
-| :--- | :--- |
-| `VAULT_EMBEDDINGS=off` | 仅关键词检索，不加载向量模型 |
-| `VAULT_OFFLINE=1` | 模型仅使用本地缓存，不下载；缓存缺失时不能提供向量能力 |
+下载或加载失败会保留关键词候选，并在状态中报告。缓存缺失时离线模式无法凭空提供语义检索。首次下载、缓存状态和环境问题请运行 `doctor`。
 
-默认模型为 `Xenova/bge-small-zh-v1.5`。模型文件、量化形式及附属文件影响下载体积，不承诺固定大小。下载或模型加载失败时仍可使用关键词检索，状态通过 `get_vault_stats` 查看。
+## 一致性与边界
 
-## 四个 MCP 工具
+每个知识库只有一个写入实例；锁在数据库迁移之前获取。只读命令可与服务并行。崩溃残留锁需 `doctor --recover-lock` 确認原进程已不存在，不按文件年龄删除。[旧版升级步骤](docs/UPGRADING.md)。
 
-| 工具 | 用途 | 参数 |
-| :--- | :--- | :--- |
-| `ping_vault` | 检查协议连接 | `message` 可选 |
-| `get_vault_stats` | 文档、切片、向量数量及索引和模型状态 | 无 |
-| `search_vault` | 返回关键词/向量排序的候选片段 | `query`，`limit` 默认 5 |
-| `read_vault_file` | 读取知识库内文件或行范围 | `relative_path`，可选 `start_line`、`end_line`，行号从 1 开始 |
+PDF 逐页处理，记录等待、处理、完成、无文字和失败。失败保留上次有效结果并标记过期；文件 hash/解析版本控制缓存复用。源文件不被改写，派生数据库位于知识库 `.vault_index.db`。
 
-服务先连接 MCP，再在后台扫描。**连接成功并不代表索引完成**；初次扫描中结果可能不完整，请先查看状态。读取工具使用真实路径（`realpath`）检查知识库边界，拒绝越界路径和指向库外的符号链接；它不是任意磁盘文件读取接口。
+检索是 SQLite FTS5 关键词 + 本地向量 + RRF。中文关键词使用字/双字词元；向量检索目前全量遍历，规模和延迟见实测。表格、多栏、公式和扫描件都有解析限制；无答案问题仍可能返回候选，不能把提示措辞当作拒答能力。
 
-## 检索如何工作
+不默认收集遥测或上传资料。本地检索返回给 MCP 客户端的片段可能被其发送给云模型，取决于客户端配置。
 
-1. **文本与分块**：按 Markdown 标题维护章节路径，保留代码与数学块的完整原文。PDF 只提供关联路径，不提取其文字；扫描面向 Markdown、文本及支持的源代码格式。
-2. **关键词**：SQLite FTS5 保存英文词元，并在 `search_text` 中生成汉字单字和相邻双字。例如“液压控制”生成“液、压、控、制”和“液压、压控、控制”。中文多字查询要求对应双字词元共同出现。这是字符级检索，**不是自然语言分词**；共同出现不证明原文中有相同的连续短语或语义。
-3. **向量**：原始切片正文 `chunk.content`（保留切片中原有的本节标题）按实际 tokenizer 长度分窗口，不重复拼接祖先标题路径 `headingPath`；标题路径仍参与关键词检索，并作为结果出处显示。每窗使用 CLS 表示并归一化，再按有效 token 数加权聚合、进行 L2 归一化。长段落、代码和公式的尾部也参与计算，不再只取前 512 字符。聚合覆盖全文，但可能稀释局部主题，不保证每个尾部细节都排在前面。
-4. **排序**：查询向量与存储向量做余弦比较；RRF 按关键词和向量候选的名次融合。融合分**不是相关概率**；没有相关资料时仍可能返回向量候选。请用路径、行号和 `read_vault_file` 核对原文，再引用结论。
+## 评测、贡献和路线
 
-向量检索目前遍历存储的向量，耗时随切片数、硬件和输入长度增长，未承诺固定延迟。SQLite 主数据库位于知识库的 `.vault_index.db`；运行时可能存在 WAL/SHM 辅助文件，模型缓存另存。
+[公开评测](benchmarks/README.md)：10 篇许可核实的真实论文，50 个冻结中文问题，开发集/留出集按论文分离；关键词、向量、混合与 QMD 使用相同提取文本比较。PDF 页码/段落核验独立于检索评分。[结果、配置、硬件、范围与失败](docs/BENCHMARK_RESULTS.md)。
 
-## 更新与一致性
-
-从旧版升级时，先停止使用同一知识库的旧服务，再更新代码、执行 `npm install` 和 `npm run build`，最后重启 MCP 客户端。首次启动会自动迁移派生索引并重建旧版本向量，原始资料无需移动或删除；用 `get_vault_stats` 确认索引状态。避免旧版与新版同时写入同一索引数据库。
-
-启动扫描使用内容 hash 和 `INDEX_VERSION` 判断是否复用；启用向量时，还要求向量完整。内容或索引算法变化会重新处理，停机期间删除的文件会在下次扫描时从索引清理。监听器更新新增、修改和删除；同一文件任务串行，写入前确认文件快照，避免旧计算覆盖新内容。实际可检索时间包含监听等待、文件读取和模型推理时间。
-
-同名 PDF 用于辅助查阅，不代表已经验证其内容或论文真实性。`sample_vault` 中的 **66 字节 PDF 是路径关联测试占位文件，不是真实论文**。
-
-## 验证
-
-```bash
+```sh
 npm test
+npm run test:package
+npm run models:prepare
 npm run test:integration
-npm run build
+npm run benchmark
+npm run benchmark:bge
 ```
 
-`npm test` 先检查源码和测试的类型，再执行离线回归（含实际 MCP 关键词模式与文件监听）；`npm run test:integration` 使用真实缓存模型，需要事先准备模型缓存；`npm run build` 检查 TypeScript 构建。未运行某一层验证就不能视为该层通过；本次验收记录见 [PROJECT_PLAN.md](./PROJECT_PLAN.md)。入门原理见 [LEARNING_GUIDE.md](./LEARNING_GUIDE.md)。
+CI 覆盖 Windows、Linux、macOS 的 Node 22/24 构建、回归和安装包；真实模型单独执行，以实际 Actions 结果为准。加入[公开试用](docs/TRYOUT.md)或从[贡献指南](CONTRIBUTING.md)中的小任务开始。
 
-## 许可证
+下一步由真实问题驱动：至少 3 位试用者独立遇到 CLI 难以解决的导入状态或出处预览问题，才启动轻量界面；OCR、重排序和共享服务分别依据解析失败、检索失误和多客户端需求决定。
 
-[MIT License](./LICENSE)
+代码 [MIT](LICENSE)；示例论文与评测论文遵循各自 [CC BY 4.0 署名](benchmarks/corpus/ATTRIBUTION.md)。[更新记录](CHANGELOG.md)保留 0.1、0.2 历史。

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "frozenAt": "2026-09-25T14:07:42Z",
+  "path": "../questions.json",
+  "sha256": "c1487c5be9de9dad887fa735aaba40336dd3e77abd22e0a88b914d45cdf50d91",
+  "counts": {
+    "total": 50,
+    "answerable": 40,
+    "unanswerable": 10,
+    "crossLanguageAnswerable": 40,
+    "dev": 25,
+    "test": 25
+  },
+  "devDocuments": [
+    "gpflow",
+    "imbalanced-learn",
+    "scikit-multiflow",
+    "pyro",
+    "giotto-tda"
+  ],
+  "testDocuments": [
+    "river",
+    "tslearn",
+    "stable-baselines3",
+    "gluonts",
+    "mvlearn"
+  ],
+  "policy": "Frozen before any retrieval run. Do not alter this file or questions to improve measured retrieval. Corrections require a new benchmark version and a documented erratum."
+}

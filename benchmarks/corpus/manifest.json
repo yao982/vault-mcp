@@ -1,0 +1,104 @@
+{
+  "documents": [
+    {
+      "id": "gpflow",
+      "path": "papers/gpflow.pdf",
+      "title": "GPflow: A Gaussian Process Library using TensorFlow",
+      "url": "https://jmlr.org/papers/volume18/16-537/16-537.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "7278a2c6560bbd13acacb45f77bcc4b3034349932232bc7bcfff8e2483095441",
+      "language": "en"
+    },
+    {
+      "id": "imbalanced-learn",
+      "path": "papers/imbalanced-learn.pdf",
+      "title": "Imbalanced-learn: A Python Toolbox to Tackle the Curse of Imbalanced Datasets in Machine Learning",
+      "url": "https://jmlr.org/papers/volume18/16-365/16-365.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "bef5dd92195a39729639993265d284fd1efad872515e9bfbfafdff0ab66f031b",
+      "language": "en"
+    },
+    {
+      "id": "scikit-multiflow",
+      "path": "papers/scikit-multiflow.pdf",
+      "title": "Scikit-Multiflow: A Multi-output Streaming Framework",
+      "url": "https://jmlr.org/papers/volume19/18-251/18-251.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "99190b767130fb351ea8974d64f6ea1d35b6d7fec6b2e75d3c533ba70036f0d9",
+      "language": "en"
+    },
+    {
+      "id": "pyro",
+      "path": "papers/pyro.pdf",
+      "title": "Pyro: Deep Universal Probabilistic Programming",
+      "url": "https://jmlr.org/papers/volume20/18-403/18-403.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "a1ab7757547176bd67963c80c532c082a96947de378c640fd739584321f819c6",
+      "language": "en"
+    },
+    {
+      "id": "giotto-tda",
+      "path": "papers/giotto-tda.pdf",
+      "title": "giotto-tda: A Topological Data Analysis Toolkit for Machine Learning and Data Exploration",
+      "url": "https://jmlr.org/papers/volume22/20-325/20-325.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "b548e4763476fdd8b63ef74e7c15bb6af8a08a962d7861472935756af11f1e80",
+      "language": "en"
+    },
+    {
+      "id": "river",
+      "path": "papers/river.pdf",
+      "title": "River: machine learning for streaming data in Python",
+      "url": "https://jmlr.org/papers/volume22/20-1380/20-1380.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "65f1e31d8363b0aa24be4750ee22fd52da9f1f92768f9f18add1a24d45d76857",
+      "language": "en"
+    },
+    {
+      "id": "tslearn",
+      "path": "papers/tslearn.pdf",
+      "title": "Tslearn, A Machine Learning Toolkit for Time Series Data",
+      "url": "https://jmlr.org/papers/volume21/20-091/20-091.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "03176d0416d4b86418292eda076b80bda8cebea1531e47fd3f67bce4c267228d",
+      "language": "en"
+    },
+    {
+      "id": "stable-baselines3",
+      "path": "papers/stable-baselines3.pdf",
+      "title": "Stable-Baselines3: Reliable Reinforcement Learning Implementations",
+      "url": "https://jmlr.org/papers/volume22/20-1364/20-1364.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "81f4c806f3e7adfb5c6c1cf1f35a561f9d20e684b8d88e671364563b6c69f8ff",
+      "language": "en"
+    },
+    {
+      "id": "gluonts",
+      "path": "papers/gluonts.pdf",
+      "title": "GluonTS: Probabilistic and Neural Time Series Modeling in Python",
+      "url": "https://jmlr.org/papers/volume21/19-820/19-820.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "3d2421c0cc007b1ecc9ee0f8e74c05e90c9fa0aba81691780db9476ae72ea5ec",
+      "language": "en"
+    },
+    {
+      "id": "mvlearn",
+      "path": "papers/mvlearn.pdf",
+      "title": "mvlearn: Multiview Machine Learning in Python",
+      "url": "https://jmlr.org/papers/volume22/20-1370/20-1370.pdf",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sha256": "2e6335ceab1284938852859319b29e66a2c38e447386ece9ca8c08a46e812d47",
+      "language": "en"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+name: Research workflow / 科研需求
+description: Describe a concrete workflow that is currently difficult
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What task were you trying to complete, and where did you get stuck?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What observable outcome would solve it?

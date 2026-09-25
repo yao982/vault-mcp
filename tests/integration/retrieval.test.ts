@@ -22,7 +22,7 @@ const fixturePath = path.join(projectRoot, "tests", "fixtures", "retrieval.json"
 function copySampleFiles(source: string, destination: string): void {
   mkdirSync(destination, { recursive: true });
   for (const entry of readdirSync(source, { withFileTypes: true })) {
-    if (entry.isSymbolicLink() || entry.name.startsWith(".vault_index.db")) continue;
+    if (entry.isSymbolicLink() || entry.name.startsWith(".") || path.extname(entry.name).toLowerCase() === ".pdf") continue;
     const sourcePath = path.join(source, entry.name);
     const destinationPath = path.join(destination, entry.name);
     if (entry.isDirectory()) copySampleFiles(sourcePath, destinationPath);
@@ -90,6 +90,7 @@ test("offline cached BGE model retrieves sample and synthetic knowledge", { time
     }
 
     database = new VaultDatabase(vaultRoot);
+    database.setEmbeddingProfile("bge-small-zh");
     const indexer = new VaultIndexer(vaultRoot, database, embeddingService);
     const indexStatus = await indexer.indexAll();
     assert.equal(indexStatus.failedFiles, 0, `indexing failed: ${indexStatus.lastError ?? "unknown error"}`);

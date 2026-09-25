@@ -1,0 +1,108 @@
+{
+  "scope": "No sufficient answer in these ten fixed PDFs; not a claim that the information is unknowable or absent elsewhere.",
+  "method": "Read the paper sections and search the full extracted corpus for the requested experiment, metric or listing. Labels are project-authored and should receive independent human review.",
+  "questions": [
+    {
+      "id": "ND01",
+      "reason": "The 2017 GPflow timing experiment reports an older Titan X setup, not RTX 4090/A100 measurements."
+    },
+    {
+      "id": "ND02",
+      "reason": "The imbalanced-learn article describes sampling methods and API; it does not report this CIFAR-100 comparison."
+    },
+    {
+      "id": "ND03",
+      "reason": "No fixed 60-second delayed-label experiment or corresponding ranking is reported in this corpus."
+    },
+    {
+      "id": "ND04",
+      "reason": "The paper does not list the per-run random seeds for the timing experiments."
+    },
+    {
+      "id": "ND05",
+      "reason": "The MNIST figure illustrates the topological pipeline; the corpus does not provide the requested per-class evaluation matrix."
+    },
+    {
+      "id": "NT01",
+      "reason": "The River benchmark reports timing and accuracy, not measured energy consumption."
+    },
+    {
+      "id": "NT02",
+      "reason": "The paper presents clustering plots and code but not a complete row-level ground-truth label listing."
+    },
+    {
+      "id": "NT03",
+      "reason": "The SB3 article states a single-agent scope and does not report this matched multi-agent eight-GPU experiment."
+    },
+    {
+      "id": "NT04",
+      "reason": "The reported benchmark table contains mean quantile losses, not a calibrated 90-percent interval-coverage result."
+    },
+    {
+      "id": "NT05",
+      "reason": "The library article mentions a Nutrimouse loader but does not publish an animal-level train/validation/test assignment."
+    }
+  ],
+  "fullCorpusTermChecks": [
+    {
+      "term": "RTX 4090",
+      "matches": []
+    },
+    {
+      "term": "A100",
+      "matches": []
+    },
+    {
+      "term": "CIFAR-100",
+      "matches": []
+    },
+    {
+      "term": "60 second",
+      "matches": []
+    },
+    {
+      "term": "random seed",
+      "matches": []
+    },
+    {
+      "term": "confusion matrix",
+      "matches": []
+    },
+    {
+      "term": "watt",
+      "matches": []
+    },
+    {
+      "term": "energy consumption",
+      "matches": []
+    },
+    {
+      "term": "90%",
+      "matches": [
+        {
+          "path": "papers/tslearn.pdf",
+          "page": 2
+        }
+      ]
+    },
+    {
+      "term": "Nutrimouse",
+      "matches": [
+        {
+          "path": "papers/mvlearn.pdf",
+          "page": 4
+        }
+      ]
+    },
+    {
+      "term": "multi-agent",
+      "matches": [
+        {
+          "path": "papers/stable-baselines3.pdf",
+          "page": 4
+        }
+      ]
+    }
+  ],
+  "caution": "Term absence alone is not proof of no answer. Positive keyword matches were inspected in context; e.g. tslearn 90% is code coverage, Nutrimouse is a loader mention, and SB3 multi-agent describes RLlib capabilities rather than the requested experiment."
+}

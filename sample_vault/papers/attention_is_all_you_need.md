@@ -1,4 +1,6 @@
-# Attention Is All You Need (MinerU 转换示例)
+# Attention Is All You Need（教学阅读笔记）
+
+这是项目自带的简化中文学习笔记，不是论文全文，也不是经过验证的 MinerU 转换结果。原先用于路径绑定测试的占位 PDF 已移除。实际 PDF 提取与页码核对请使用同目录的 gpflow.pdf。
 
 ## 1. Introduction
 主流的序列转导模型都基于复杂的循环神经网络或卷积神经网络，这些模型按时间步顺序计算，阻碍了并行化。

@@ -1,0 +1,212 @@
+{
+  "checkedAt": "2026-09-25",
+  "method": "Every original PDF first-page license statement was extracted and checked; paper license is distinct from software license.",
+  "documents": [
+    {
+      "id": "gpflow",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v18/16-537.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v18/16-537.html.",
+      "pageCount": 6,
+      "bytes": 221820,
+      "authors": [
+        "Alexander G. de G. Matthews",
+        "Mark van der Wilk",
+        "Tom Nickson",
+        "Keisuke Fujii",
+        "Alexis Boukouvalas",
+        "Pablo León-Villagrá",
+        "Zoubin Ghahramani",
+        "James Hensman"
+      ],
+      "publicationYear": "2017"
+    },
+    {
+      "id": "imbalanced-learn",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v18/16-365.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v18/16-365.html.",
+      "pageCount": 5,
+      "bytes": 246148,
+      "authors": [
+        "Guillaume  Lemaître",
+        "Fernando Nogueira",
+        "Christos K. Aridas"
+      ],
+      "publicationYear": "2017"
+    },
+    {
+      "id": "scikit-multiflow",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v19/18-251.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v19/18-251.html.",
+      "pageCount": 5,
+      "bytes": 265471,
+      "authors": [
+        "Jacob Montiel",
+        "Jesse Read",
+        "Albert Bifet",
+        "Talel Abdessalem"
+      ],
+      "publicationYear": "2018"
+    },
+    {
+      "id": "pyro",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v20/18-403.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v20/18-403.html.",
+      "pageCount": 6,
+      "bytes": 199595,
+      "authors": [
+        "Eli Bingham",
+        "Jonathan P. Chen",
+        "Martin Jankowiak",
+        "Fritz Obermeyer",
+        "Neeraj Pradhan",
+        "Theofanis Karaletsos",
+        "Rohit Singh",
+        "Paul Szerlip",
+        "Paul Horsfall",
+        "Noah D. Goodman"
+      ],
+      "publicationYear": "2019"
+    },
+    {
+      "id": "giotto-tda",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v22/20-325.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v22/20-325.html.",
+      "pageCount": 6,
+      "bytes": 584317,
+      "authors": [
+        "Guillaume Tauzin",
+        "Umberto Lupo",
+        "Lewis Tunstall",
+        "Julian Burella Pérez",
+        "Matteo Caorsi",
+        "Anibal M. Medina-Mardones",
+        "Alberto Dassatti",
+        "Kathryn Hess"
+      ],
+      "publicationYear": "2021"
+    },
+    {
+      "id": "river",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v22/20-1380.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v22/20-1380.html.",
+      "pageCount": 8,
+      "bytes": 255720,
+      "authors": [
+        "Jacob Montiel",
+        "Max Halford",
+        "Saulo Martiello Mastelini",
+        "Geoffrey Bolmier",
+        "Raphael Sourty",
+        "Robin Vaysse",
+        "Adil Zouitine",
+        "Heitor Murilo Gomes",
+        "Jesse Read",
+        "Talel Abdessalem",
+        "Albert Bifet"
+      ],
+      "publicationYear": "2021"
+    },
+    {
+      "id": "tslearn",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v21/20-091.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v21/20-091.html.",
+      "pageCount": 6,
+      "bytes": 677706,
+      "authors": [
+        "Romain Tavenard",
+        "Johann Faouzi",
+        "Gilles Vandewiele",
+        "Felix Divo",
+        "Guillaume Androz",
+        "Chester Holtz",
+        "Marie Payne",
+        "Roman Yurchak",
+        "Marc Rußwurm",
+        "Kushal Kolar",
+        "Eli Woods"
+      ],
+      "publicationYear": "2020"
+    },
+    {
+      "id": "stable-baselines3",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v22/20-1364.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v22/20-1364.html.",
+      "pageCount": 8,
+      "bytes": 249259,
+      "authors": [
+        "Antonin Raffin",
+        "Ashley Hill",
+        "Adam Gleave",
+        "Anssi Kanervisto",
+        "Maximilian Ernestus",
+        "Noah Dormann"
+      ],
+      "publicationYear": "2021"
+    },
+    {
+      "id": "gluonts",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v21/19-820.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v21/19-820.html.",
+      "pageCount": 6,
+      "bytes": 301839,
+      "authors": [
+        "Alexander Alexandrov",
+        "Konstantinos Benidis",
+        "Michael Bohlke-Schneider",
+        "Valentin Flunkert",
+        "Jan Gasthaus",
+        "Tim Januschowski",
+        "Danielle C. Maddix",
+        "Syama Rangapuram",
+        "David Salinas",
+        "Jasper Schulz",
+        "Lorenzo Stella",
+        "Ali Caner Türkmen",
+        "Yuyang Wang"
+      ],
+      "publicationYear": "2020"
+    },
+    {
+      "id": "mvlearn",
+      "pdfPage": 1,
+      "quote": "License: CC-BY 4.0",
+      "attributionUrl": "https://jmlr.org/papers/v22/20-1370.html",
+      "licenseStatement": "License: CC-BY 4.0, see https://creativecommons.org/licenses/by/4.0/. Attribution requirements are provided at http://jmlr.org/papers/v22/20-1370.html.",
+      "pageCount": 7,
+      "bytes": 246762,
+      "authors": [
+        "Ronan Perry",
+        "Gavin Mischler",
+        "Richard Guo",
+        "Theodore Lee",
+        "Alexander Chang",
+        "Arman Koul",
+        "Cameron Franz",
+        "Hugo Richard",
+        "Iain Carmichael",
+        "Pierre Ablin",
+        "Alexandre Gramfort",
+        "Joshua T. Vogelstein"
+      ],
+      "publicationYear": "2021"
+    }
+  ]
+}

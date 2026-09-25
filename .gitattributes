@@ -1,0 +1,12 @@
+* text=auto
+*.ts text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.html text eol=lf
+*.pdf binary
+*.cast -text
+# Frozen checksum is over the original bytes, including their line endings.
+benchmarks/questions.json -text

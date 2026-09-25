@@ -1,0 +1,25 @@
+name: Preview trial / 试用反馈
+description: Help evaluate independent installation and verifiable research retrieval
+body:
+  - type: input
+    id: environment
+    attributes:
+      label: OS / Node version / installation method
+    validations:
+      required: true
+  - type: dropdown
+    id: success
+    attributes:
+      label: Did you install and find useful evidence without maintainer help?
+      options:
+        - Yes / 独立完成
+        - Installed, retrieval failed / 安装完成但检索未成功
+        - Needed help / 需要帮助
+        - Could not install / 安装失败
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: Timing, citation accuracy and obstacles / 用时、页码核对与卡点
+      description: Separate installation, model download and indexing times. Do not post private material. Describe any import-status or source-preview task that the CLI could not solve.

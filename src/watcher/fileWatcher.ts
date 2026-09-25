@@ -2,6 +2,7 @@ import { watch, type FSWatcher } from "chokidar";
 import path from "node:path";
 import { VaultIndexer } from "../indexer.js";
 import { isIgnoredPath, isSupportedFile } from "../vaultPaths.js";
+import { IMPORT_MANIFEST_NAME } from "../parser/imports.js";
 
 /** Start watching before scanning, to capture edits during startup. */
 export class VaultFileWatcher {
@@ -17,7 +18,9 @@ export class VaultFileWatcher {
     });
     const update = (filename: string) => {
       const relativePath = path.relative(this.vaultRoot, filename).replace(/\\/g, "/");
-      const operation = isSupportedFile(relativePath)
+      const operation = relativePath.toLocaleLowerCase("en-US") === IMPORT_MANIFEST_NAME
+        ? this.indexer.indexAll()
+        : isSupportedFile(relativePath)
         ? this.indexer.indexSingleFile(relativePath)
         : path.extname(relativePath).toLowerCase() === ".pdf" ? this.indexer.indexAll() : null;
       if (operation) void operation.catch(error => this.indexer.recordError(error));

@@ -1,5 +1,7 @@
 # Vault-MCP 0.2.0：实现边界与验收记录
 
+> 这是保留的 0.2 历史验收记录，不代表当前 0.3 预览版功能边界。当前路线、评测与尚未完成的真实试用见 [README](README.md)、[当前验收](docs/BENCHMARK_RESULTS.md) 和 [公开试用](docs/TRYOUT.md)。
+
 项目面向个人知识库：Markdown、文本和源代码检索；PDF 只关联路径。运行要求为 Node.js >= 22，使用 TypeScript、MCP stdio、SQLite FTS5 与本地 `Xenova/bge-small-zh-v1.5`。本文件区分修复目标和实测证据，不能以勾选项替代执行记录。
 
 ## 本次修复交付范围

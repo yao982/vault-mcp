@@ -22,3 +22,11 @@ Thumbs.db
 .env
 .env.local
 run-vault.bat
+
+# Runtime locks, model caches, build/release artifacts
+.vault-mcp.lock*
+.vault-import-*.tmp
+.cache/
+*.tgz
+benchmarks/.work/
+.agent-handoff/

@@ -1,0 +1,646 @@
+{
+  "version": 1,
+  "frozenAt": "2026-09-25T14:07:42Z",
+  "questions": [
+    {
+      "id": "D01",
+      "split": "dev",
+      "question": "以 TensorFlow 为后端的高斯过程库，为同时处理非共轭似然和大数据规模，主要采用哪类近似推断？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gpflow.pdf",
+          "page": 2,
+          "quote": "The use of variational inference as the primary approximation method to meet the twin challenges of non-conjugacy and scale (Matthews, 2016)."
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "split": "dev",
+      "question": "GPflow 与 GPy 都提供 Python 接口，但核心数值计算依赖有什么不同？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gpflow.pdf",
+          "page": 2,
+          "quote": "An important difference between GPflow and GPy is that GPflow uses TensorFlow for its core computations rather than numeric Python."
+        }
+      ]
+    },
+    {
+      "id": "D03",
+      "split": "dev",
+      "question": "为了让计算图能够对 Cholesky 分解求导，GPflow 作者向 TensorFlow 补充了什么操作和实现？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gpflow.pdf",
+          "page": 3,
+          "quote": "The differentiation of computational graphs that used the Cholesky decomposition required a new Op, which we contributed. The main part of the code was a C++ implementation of the blocked Cholesky algorithm proposed by Murray (2016)."
+        }
+      ]
+    },
+    {
+      "id": "D04",
+      "split": "dev",
+      "question": "一个高斯过程参数既要作为 Python 对象属性访问，又要参与 TensorFlow 图优化，GPflow 用哪个类连接这两种表示？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gpflow.pdf",
+          "page": 4,
+          "quote": "This is achieved through the Param class that allows parameters to be both properties of an object that can be manipulated as such and Variables in a TensorFlow graph that can be optimized."
+        }
+      ]
+    },
+    {
+      "id": "D05",
+      "split": "dev",
+      "question": "清洗式欠采样是否保证达到指定的类别平衡比例，还是依据别的准则删除样本？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/imbalanced-learn.pdf",
+          "page": 3,
+          "quote": "cleaning under-sampling do not allow to reach specifically the balancing ratio r χ res , but rather clean the feature space based on some empirical criteria."
+        }
+      ]
+    },
+    {
+      "id": "D06",
+      "split": "dev",
+      "question": "少数类过采样可能造成过拟合，论文建议将它与哪类欠采样方法结合？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/imbalanced-learn.pdf",
+          "page": 4,
+          "quote": "Over-sampling can lead to over-fitting which can be avoided by applying cleaning under-sampling methods (Prati et al., 2009)."
+        }
+      ]
+    },
+    {
+      "id": "D07",
+      "split": "dev",
+      "question": "不平衡分类中，单次欠采样会丢掉多数类样本；集成策略怎样尽量利用这些样本？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/imbalanced-learn.pdf",
+          "page": 4,
+          "quote": "Ensemble methods offer an alternative to use most of the samples. In fact, an ensemble of balanced sets is created and used to later train any classifier."
+        }
+      ]
+    },
+    {
+      "id": "D08",
+      "split": "dev",
+      "question": "在 imbalanced-learn 中，怎样把重采样、特征变换和分类器自动组合成同一处理链？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/imbalanced-learn.pdf",
+          "page": 3,
+          "quote": "A class Pipeline is inherited from the scikit-learn toolbox to automatically combine samplers , transformers , and estimators ."
+        }
+      ]
+    },
+    {
+      "id": "D09",
+      "split": "dev",
+      "question": "流数据的预序评估对每个新样本先测试还是先训练？这样安排的顺序在原文如何描述？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/scikit-multiflow.pdf",
+          "page": 3,
+          "quote": "where tests are performed on new data before using it to train the model."
+        }
+      ]
+    },
+    {
+      "id": "D10",
+      "split": "dev",
+      "question": "scikit-multiflow 的 StreamModel 中，持续接收新样本时用于增量训练的接口是哪一个？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/scikit-multiflow.pdf",
+          "page": 3,
+          "quote": "partial fit — Incrementally trains a stream model."
+        }
+      ]
+    },
+    {
+      "id": "D11",
+      "split": "dev",
+      "question": "多输出流分类除了准确率，还可以用哪些同时衡量多个目标的评估指标？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/scikit-multiflow.pdf",
+          "page": 3,
+          "quote": "Multi-Output Classification (Hamming Score, Hamming Loss, Exact Match, Jaccard Index)"
+        }
+      ]
+    },
+    {
+      "id": "D12",
+      "split": "dev",
+      "question": "scikit-multiflow 中谁负责从数据流取样、训练和测试模型，并持续记录性能？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/scikit-multiflow.pdf",
+          "page": 4,
+          "quote": "The StreamEvaluator performs multiple tasks: queries the stream for data, trains and tests the model on the incoming data and continuously tracks the model’s performance."
+        }
+      ]
+    },
+    {
+      "id": "D13",
+      "split": "dev",
+      "question": "Pyro 如何在普通 Python 程序中分别标记随机采样和需要学习的参数？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/pyro.pdf",
+          "page": 3,
+          "quote": "pyro.sample for annotating calls to functions with internal randomness, and pyro.param for registering learnable parameters with inference algorithms that can change them."
+        }
+      ]
+    },
+    {
+      "id": "D14",
+      "split": "dev",
+      "question": "Pyro 的随机变分推断为什么能够处理大数据，而不必每一步都使用完整数据集？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/pyro.pdf",
+          "page": 3,
+          "quote": "it scales to large data sets thanks to stochastic gradient estimates computed over mini-batches of data in SVI."
+        }
+      ]
+    },
+    {
+      "id": "D15",
+      "split": "dev",
+      "question": "给概率模型编写近似后验 guide 时，输入参数与未约束的采样语句必须满足哪些对应关系？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/pyro.pdf",
+          "page": 3,
+          "quote": "A guide for a given model must take the same input arguments as the model and contain a corresponding sample statement for every unconstrained sample statement in the model but is otherwise unrestricted."
+        }
+      ]
+    },
+    {
+      "id": "D16",
+      "split": "dev",
+      "question": "Pyro 为了把推断算法与语言细节分离，依赖哪个效应处理库，它负责哪类操作？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/pyro.pdf",
+          "page": 3,
+          "quote": "Pyro is built on Poutine, a library of effect handlers (Kammar et al. (2013)) that implement individual control and book-keeping operations used for inspecting and modifying the behavior of Pyro programs, separating inference algorithm implementations from language details."
+        }
+      ]
+    },
+    {
+      "id": "D17",
+      "split": "dev",
+      "question": "时间序列做拓扑嵌入后样本数变了，怎样让监督目标与变换后的输入重新对齐？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/giotto-tda.pdf",
+          "page": 2,
+          "quote": "It provides a resample method that modifies the target’s sample number to align it with the transformed input data."
+        }
+      ]
+    },
+    {
+      "id": "D18",
+      "split": "dev",
+      "question": "要把持久图输入机器学习模型，giotto-tda 提到哪些从持久图提取特征的表示方式？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/giotto-tda.pdf",
+          "page": 2,
+          "quote": "features are often extracted from persistence diagrams by first representing them as curves or images, or by defining kernels."
+        }
+      ]
+    },
+    {
+      "id": "D19",
+      "split": "dev",
+      "question": "拓扑数据分析中的 Mapper 把高维数据组织成什么结构，它主要用来探索什么？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/giotto-tda.pdf",
+          "page": 3,
+          "quote": "description of the input as an unweighted graph (or, more generally, as a simplicial complex). It is primarily used as a data visualization tool to explore substructures of interest in data."
+        }
+      ]
+    },
+    {
+      "id": "D20",
+      "split": "dev",
+      "question": "反复调整 Mapper 超参数并交互观察图形时，giotto-tda 用什么机制避免不必要的重复计算？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/giotto-tda.pdf",
+          "page": 3,
+          "quote": "make use of memory caching to avoid unnecessary re-computations. Mem- ory caching is especially useful for interactive plotting, where giotto-tda allows users to tune mapper’s hyperparameters and observe how the resulting graph changes in real time."
+        }
+      ]
+    },
+    {
+      "id": "T01",
+      "split": "test",
+      "question": "在线数据一次只到来一个样本时，River 为什么默认用字典而不是固定大小的多维数组？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/river.pdf",
+          "page": 3,
+          "quote": "dictionaries are the default data structure in River as they efficiently store one-dimensional data with O (1) lookup and insertion (Gorelick and Ozsvaldl, 2020)"
+        }
+      ]
+    },
+    {
+      "id": "T02",
+      "split": "test",
+      "question": "River 的流水线由多个估计器串联时，最后一步之前的各步骤必须满足什么类型约束？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/river.pdf",
+          "page": 3,
+          "quote": "A pipeline is essentially a list of estimators that are applied in sequence. The only requirement is that the first n − 1 steps are transformers. The last step can be a regressor, a classifier, a clusterer, a transformer, etc."
+        }
+      ]
+    },
+    {
+      "id": "T03",
+      "split": "test",
+      "question": "从单样本更新切换到小批量更新时，River 的方法后缀和输入数据容器各有什么变化？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/river.pdf",
+          "page": 4,
+          "quote": "the suffix _many instead of _one , e.g. learn_one() — learn_many() . These methods expect pandas.DataFrame (pandas develop- ment team, 2020) as input, a flexible data structure with labeled axes."
+        }
+      ]
+    },
+    {
+      "id": "T04",
+      "split": "test",
+      "question": "River 的 Elec2 速度比较用了多少个样本、多少个数值特征，以及几次重复来计算平均耗时？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/river.pdf",
+          "page": 4,
+          "quote": "has 45312 samples with 8 numerical features. Reported processing time is the average of running the experiment 7 times"
+        }
+      ]
+    },
+    {
+      "id": "T05",
+      "split": "test",
+      "question": "不同长度的时间序列放进同一个三维数组时，tslearn 如何补齐短序列，长度维度取什么值？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/tslearn.pdf",
+          "page": 2,
+          "quote": "If time series from the set are not equal-sized, NaN values are appended to the shorter ones and T is hence the maximum of sizes for time series in the set:"
+        }
+      ]
+    },
+    {
+      "id": "T06",
+      "split": "test",
+      "question": "只安装基础数组和传统机器学习依赖，能否使用 tslearn 论文中的 shapelet 模型？还需要什么后端？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/tslearn.pdf",
+          "page": 2,
+          "quote": "Finally, keras (Chol- let et al., 2015) with tensorflow (Abadi et al., 2016) backend is an optional dependency that is necessary to use the shapelets module in tslearn that provides an efficient imple- mentation of the shapelet model by Grabocka et al. (2014)."
+        }
+      ]
+    },
+    {
+      "id": "T07",
+      "split": "test",
+      "question": "时间序列聚类示例中，普通欧氏距离的 k-means 失败时，基于哪种距离的版本能区分不同序列形态？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/tslearn.pdf",
+          "page": 3,
+          "quote": "where standard Euclidean k -means fails while DTW-based ones (Sakoe and Chiba, 1978; Petitjean et al., 2011; Cuturi and Blondel, 2017) can distinguish between different time series profiles:"
+        }
+      ]
+    },
+    {
+      "id": "T08",
+      "split": "test",
+      "question": "tslearn 为什么仍提供与其他时间序列库之间的数据格式转换，而不是宣称自身覆盖每个任务的全部算法？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/tslearn.pdf",
+          "page": 4,
+          "quote": "Note however that, since the packages listed above are more focused than tslearn , they tend to incorporate a wider range of algorithms for their task of interest than our library. This is why we have included utilities to cast data sets between tslearn format and the ones used by these libraries, in order to help facilitate interoperability."
+        }
+      ]
+    },
+    {
+      "id": "T09",
+      "split": "test",
+      "question": "为了保持强化学习库易用和易维护，SB3 将算法范围限制在哪些方面，模仿学习和离线学习如何扩展？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/stable-baselines3.pdf",
+          "page": 2,
+          "quote": "we focus on model-free, single-agent RL algorithms, and rely on exter- nal projects to extend the scope to imitation (Wang et al., 2020) and offline learning (Seno, 2020)."
+        }
+      ]
+    },
+    {
+      "id": "T10",
+      "split": "test",
+      "question": "强化学习实现仅通过单元测试还不够，SB3 如何用已发表的实验结果核验算法行为？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/stable-baselines3.pdf",
+          "page": 3,
+          "quote": "Algorithms are verified against published results by comparing the agent learning curves 6 ."
+        }
+      ]
+    },
+    {
+      "id": "T11",
+      "split": "test",
+      "question": "SB3 的实验框架在评估环境、SAC 的动作选择以及超参数保存上采用了哪些复现实验做法？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/stable-baselines3.pdf",
+          "page": 3,
+          "quote": "such as evaluating in a separate environment, using deterministic evaluation where required (SAC) and storing all hyperparameters necessary to replicate the experiment."
+        }
+      ]
+    },
+    {
+      "id": "T12",
+      "split": "test",
+      "question": "SB3 如何同时维持稳定的小核心，又让研究者使用尚在实验阶段的新算法？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/stable-baselines3.pdf",
+          "page": 3,
+          "quote": "We implement experimental features in a separate con- trib repository (Raffin et al., 2020). This allows SB3 to maintain a stable and compact core, while still providing the latest features, like Truncated Quantile Critics (Kuznetsov et al., 2020)."
+        }
+      ]
+    },
+    {
+      "id": "T13",
+      "split": "test",
+      "question": "时间序列数据集太大，不能一次全部载入内存时，GluonTS 的数据处理接口采用什么方式？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gluonts.pdf",
+          "page": 2,
+          "quote": "All components scale from small to large data by using Python iterators to enable streaming in the data-processing APIs, so that the datasets do not need to be fully loaded in memory."
+        }
+      ]
+    },
+    {
+      "id": "T14",
+      "split": "test",
+      "question": "GluonTS 训练后的预测结果只包含点预测值吗？Forecast 对象还封装哪些信息？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gluonts.pdf",
+          "page": 3,
+          "quote": "Trained models (Predictors) return Forecast objects as predictions, which contain a time index and a representation of the probability distribution of values over that index."
+        }
+      ]
+    },
+    {
+      "id": "T15",
+      "split": "test",
+      "question": "概率时间序列模型做异常检测时，一个观测点在模型下的似然与异常程度是什么关系？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gluonts.pdf",
+          "page": 3,
+          "quote": "the lower the likelihood of a point, the more abnormal it is."
+        }
+      ]
+    },
+    {
+      "id": "T16",
+      "split": "test",
+      "question": "GluonTS 的模型比较表为何不能视为穷尽性的最优性能比较？超参数和梯度更新预算怎样设置？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/gluonts.pdf",
+          "page": 4,
+          "quote": "The table is not intended to serve as an exhaustive comparison between the models, therefore the hyperparameters the hyperparameters of each method are fixed across all datasets and the training is limited to 5000 gradient updates."
+        }
+      ]
+    },
+    {
+      "id": "T17",
+      "split": "test",
+      "question": "多视图学习把多个数据矩阵放进 Xs 列表时，各矩阵的同一行必须对应什么？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/mvlearn.pdf",
+          "page": 2,
+          "quote": "where Xs is a list of data matrices, corresponding to a set of views with matched samples (i.e. the i th row of each matrix represents the features of the same i th sample across views)."
+        }
+      ]
+    },
+    {
+      "id": "T18",
+      "split": "test",
+      "question": "多视图输入必须整理成规则的三阶张量吗？不同视图的特征维数是否必须相同？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/mvlearn.pdf",
+          "page": 2,
+          "quote": "Note that Xs need not be a third-order tensor as each view need not have the same number of features."
+        }
+      ]
+    },
+    {
+      "id": "T19",
+      "split": "test",
+      "question": "在 mvlearn 的协同训练分类中，为不同视图替换自定义分类器时，分类器至少需要提供什么预测接口？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/mvlearn.pdf",
+          "page": 4,
+          "quote": "If desired, the user can specify nearly any type of classifier for each view, specifically any scikit-learn -compatible classifier which implements a predict proba method."
+        }
+      ]
+    },
+    {
+      "id": "T20",
+      "split": "test",
+      "question": "只有一个原始数据视图时，mvlearn 的 Compose 模块提出哪两类投影来构造可用于多视图学习的数据？",
+      "answerable": true,
+      "crossLanguage": true,
+      "evidence": [
+        {
+          "path": "papers/mvlearn.pdf",
+          "page": 4,
+          "quote": "view-generation algorithms in this module such as Gaussian random projections and random subspace projec- tions allow multiview methods to still be applied and may improve upon results from single-view methods (Sun, 2013; Nigam and Ghani, 2000; Ho, 1998)."
+        }
+      ]
+    },
+    {
+      "id": "ND01",
+      "split": "dev",
+      "question": "GPflow 的 MNIST 推断在 RTX 4090 和 A100 上分别达到每秒多少次迭代？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "ND02",
+      "split": "dev",
+      "question": "imbalanced-learn 论文中，在 CIFAR-100 上将 SMOTE 换成 ADASYN 后测试准确率提升了多少个百分点？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "ND03",
+      "split": "dev",
+      "question": "scikit-multiflow 在所有标签统一延迟 60 秒到达的实验中，哪种算法的平均准确率最高？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "ND04",
+      "split": "dev",
+      "question": "Pyro 论文的每一次计时实验分别使用了哪个随机种子？请给出完整种子列表。",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "ND05",
+      "split": "dev",
+      "question": "giotto-tda 的 MNIST 示例中，每个数字类别的测试准确率和完整混淆矩阵是什么？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "NT01",
+      "split": "test",
+      "question": "River 在 Elec2 基准运行期间每处理一百万个样本消耗多少瓦时电能？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "NT02",
+      "split": "test",
+      "question": "tslearn 的 Trace 聚类实验中，每个输入序列对应的真实类别标签完整列表是什么？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "NT03",
+      "split": "test",
+      "question": "SB3 与 RLlib 在相同八张 GPU 的多智能体环境中，平均回报及其 95% 置信区间分别是多少？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "NT04",
+      "split": "test",
+      "question": "GluonTS 电力预测实验经过概率校准后，90% 预测区间的实际覆盖率是多少？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    },
+    {
+      "id": "NT05",
+      "split": "test",
+      "question": "mvlearn 的 Nutrimouse 数据中，每只动物具体被分到训练集、验证集还是测试集？",
+      "answerable": false,
+      "crossLanguage": false,
+      "evidence": []
+    }
+  ]
+}

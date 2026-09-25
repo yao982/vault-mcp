@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-25T14:38:18.154Z",
+  "purpose": "Synthetic throughput and latency benchmark; no retrieval-quality claim.",
+  "syntheticDataNotice": "Synthetic numbered English research sentences measure throughput only; they are not retrieval-quality evidence.",
+  "profile": {
+    "name": "multilingual-e5-small",
+    "modelId": "Xenova/multilingual-e5-small",
+    "dimensions": 384,
+    "pooling": "mean",
+    "queryPrefix": "query: ",
+    "documentPrefix": "passage: ",
+    "fingerprint": "multilingual-e5-small|Xenova/multilingual-e5-small|mean|384|query: |passage: |norm=l2-weighted|window=unicode-codepoint-recursive|weight=body-effective-tokens|quantized=true",
+    "quantized": true
+  },
+  "environment": {
+    "operatingSystem": "Windows_NT 10.0.26200 (win32 x64)",
+    "node": "v24.15.0",
+    "cpu": {
+      "model": "Intel(R) Core(TM) i9-14900HX",
+      "logicalCores": 32,
+      "totalMemoryBytes": 16890322944
+    },
+    "peakRssSampledBytes": 584650752,
+    "processResourceUsage": {
+      "maxRssKiB": 1196184,
+      "maxRssBytes": 1224892416,
+      "userCpuTimeMicroseconds": 8517281000,
+      "systemCpuTimeMicroseconds": 232734000
+    },
+    "finalRssBytes": 1221222400,
+    "peakSamplingIntervalMs": 50
+  },
+  "model": {
+    "cacheSourceBefore": "configured",
+    "cacheSourceAfter": "configured",
+    "modelBytes": 135392016,
+    "modelMiB": 129.12,
+    "quantized": true,
+    "initializeMs": 510.919,
+    "state": "ready"
+  },
+  "queryCountPerModeAndSize": 50,
+  "generation": [
+    {
+      "through": 1000,
+      "files": 1000,
+      "durationMs": 512.964,
+      "cumulativeMs": 512.964
+    },
+    {
+      "through": 10000,
+      "files": 9000,
+      "durationMs": 6070.157,
+      "cumulativeMs": 6583.121
+    }
+  ],
+  "indexing": [
+    {
+      "through": 1000,
+      "indexPassMs": 26530.928,
+      "cumulativeIndexMs": 26530.928,
+      "updatedFiles": 1000,
+      "skippedFiles": 0,
+      "failedFiles": 0,
+      "persistedDocuments": 1000,
+      "persistedChunks": 1000,
+      "persistedVectors": 1000,
+      "vectorsWrittenThisPass": 1000,
+      "warmQueries": {
+        "count": 1000,
+        "fullSearch": {
+          "bm25": {
+            "samples": 50,
+            "p50Ms": 8.67,
+            "p95Ms": 12.991,
+            "meanMs": 9.326
+          },
+          "vector": {
+            "samples": 50,
+            "p50Ms": 26.953,
+            "p95Ms": 42.501,
+            "meanMs": 28.828
+          },
+          "hybrid": {
+            "samples": 50,
+            "p50Ms": 31.209,
+            "p95Ms": 44.795,
+            "meanMs": 33.404
+          }
+        },
+        "pureRetrieval": {
+          "bm25": {
+            "samples": 50,
+            "p50Ms": 2.86,
+            "p95Ms": 4.287,
+            "meanMs": 3.103
+          },
+          "vector": {
+            "samples": 50,
+            "p50Ms": 5.317,
+            "p95Ms": 5.815,
+            "meanMs": 6.822
+          },
+          "hybrid": {
+            "samples": 50,
+            "p50Ms": 7.412,
+            "p95Ms": 8.773,
+            "meanMs": 9.143
+          }
+        },
+        "queryEmbeddingOnly": {
+          "samples": 50,
+          "p50Ms": 7.248,
+          "p95Ms": 9.015,
+          "meanMs": 7.506
+        }
+      }
+    },
+    {
+      "through": 10000,
+      "indexPassMs": 410380.757,
+      "cumulativeIndexMs": 436911.685,
+      "updatedFiles": 9000,
+      "skippedFiles": 1000,
+      "failedFiles": 0,
+      "persistedDocuments": 10000,
+      "persistedChunks": 10000,
+      "persistedVectors": 10000,
+      "vectorsWrittenThisPass": 9000,
+      "warmQueries": {
+        "count": 10000,
+        "fullSearch": {
+          "bm25": {
+            "samples": 50,
+            "p50Ms": 25.084,
+            "p95Ms": 28.955,
+            "meanMs": 25.588
+          },
+          "vector": {
+            "samples": 50,
+            "p50Ms": 133.308,
+            "p95Ms": 177.741,
+            "meanMs": 145.481
+          },
+          "hybrid": {
+            "samples": 50,
+            "p50Ms": 139.15,
+            "p95Ms": 182.826,
+            "meanMs": 152.316
+          }
+        },
+        "pureRetrieval": {
+          "bm25": {
+            "samples": 50,
+            "p50Ms": 20.484,
+            "p95Ms": 21.776,
+            "meanMs": 20.55
+          },
+          "vector": {
+            "samples": 50,
+            "p50Ms": 95.807,
+            "p95Ms": 149.312,
+            "meanMs": 99.549
+          },
+          "hybrid": {
+            "samples": 50,
+            "p50Ms": 101.5,
+            "p95Ms": 144.546,
+            "meanMs": 116.834
+          }
+        },
+        "queryEmbeddingOnly": {
+          "samples": 50,
+          "p50Ms": 6.053,
+          "p95Ms": 13.293,
+          "meanMs": 8.817
+        }
+      }
+    }
+  ]
+}
