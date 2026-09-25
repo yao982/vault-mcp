@@ -1,4 +1,5 @@
 import { watch, type FSWatcher } from "chokidar";
+import fs from "node:fs";
 import path from "node:path";
 import { VaultIndexer } from "../indexer.js";
 import { isIgnoredPath, isSupportedFile } from "../vaultPaths.js";
@@ -7,7 +8,15 @@ import { IMPORT_MANIFEST_NAME } from "../parser/imports.js";
 /** Start watching before scanning, to capture edits during startup. */
 export class VaultFileWatcher {
   private watcher: FSWatcher | null = null;
-  constructor(private vaultRoot: string, private indexer: VaultIndexer) {}
+  private readonly vaultRoot: string;
+
+  constructor(vaultRoot: string, private indexer: VaultIndexer) {
+    // libuv's Windows fs-event backend compares incoming long-form paths with
+    // the watch root verbatim; an 8.3 root such as RUNNER~1 can abort natively.
+    this.vaultRoot = process.platform === "win32"
+      ? fs.realpathSync.native(vaultRoot)
+      : fs.realpathSync(vaultRoot);
+  }
 
   public start(): Promise<void> {
     this.watcher = watch(this.vaultRoot, {
