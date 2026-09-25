@@ -33,7 +33,16 @@ It connects local Markdown notes, academic paper conversions (such as MinerU out
   * **RRF Rank Fusion**: Combines rankings using Reciprocal Rank Fusion.
 * **Outline-Aware Chunking**: Chunks text by heading levels (`#` / `##`) to preserve breadcrumb context, avoiding splits inside multiline LaTeX math blocks (`$$...$$`) and code blocks (```` ``` ````).
 * **Paired PDF Reference**: For workflows where original PDFs are retained alongside Markdown notes, the scanner detects matching `.pdf` files and includes their relative path in search results for reference.
-* **Incremental File Watching**: Uses Chokidar to monitor directory changes, re-indexing individual files upon modification and cleaning up indexes upon file removal.
+---
+
+## 🛠️ System Architecture
+
+| Layer | Module & Technology | Responsibilities |
+| :--- | :--- | :--- |
+| **1. MCP Interface** | `@modelcontextprotocol/sdk`<br>(stdio transport / JSON-RPC 2.0) | Connects to AI clients (Cursor, Claude, VS Code, etc.), exposing `search_vault`, `read_vault_file` tools |
+| **2. Hybrid Search** | • Keyword: SQLite FTS5 (BM25)<br>• Vector: `bge-small-zh-v1.5` (ONNX)<br>• Fusion: RRF Algorithm | Combines inverted index frequency matching with 512-d dense vector cosine similarity via Reciprocal Rank Fusion |
+| **3. Parser & Binding** | • Outline-aware Markdown Chunker<br>• Paired PDF Detector (`twinBinder`) | Preserves heading hierarchy breadcrumbs; protects LaTeX equations and code blocks; detects companion `.pdf` papers |
+| **4. Storage & Watcher** | • SQLite (`.vault_index.db`)<br>• Chokidar File Watcher | Single-file local persistence (chunks + binary BLOB embeddings); monitors file saves and deletions for debounced hot-reloads |
 
 ---
 

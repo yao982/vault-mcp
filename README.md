@@ -37,33 +37,14 @@ Vault-MCP 是一个基于 Anthropic **Model Context Protocol (MCP)** 协议构�
 
 ---
 
-## 🛠️ 架构说明
+## 🛠️ 系统分层架构
 
-```
-+---------------------------------------------------------------------------------+
-|                         AI 客户端 (Cursor / Claude Desktop / VS Code 等)        |
-+---------------------------------------------------------------------------------+
-                                        |  stdio 管道 (JSON-RPC 2.0)
-+---------------------------------------v-----------------------------------------+
-|                                   Vault-MCP                                     |
-|                                                                                 |
-|  [MCP 工具层]                                                                   |
-|      - search_vault (返回相关切片、大纲路径及关联 PDF 引用)                       |
-|      - read_vault_file (查看文件全文或指定行范围)                                 |
-|      - get_vault_stats (查看当前知识库索引统计)                                  |
-|      - ping_vault (连通性自检)                                                  |
-|                                                                                 |
-|  [检索模块]                                                                     |
-|      - SQLite FTS5 (BM25)  +  本地向量 (bge-small-zh-v1.5 ONNX)                 |
-|      - RRF (Reciprocal Rank Fusion) 排名加权融合                                 |
-|                                                                                 |
-|  [解析与存储]                                                                   |
-|      - Markdown 大纲切片器 (保留公式与代码块)                                    |
-|      - 同名 PDF 路径探测器                                                      |
-|      - 本地持久化: 单一 SQLite 文件 (.vault_index.db)                           |
-|      - 文件监听器: Chokidar (增量更新/清理)                                     |
-+---------------------------------------------------------------------------------+
-```
+| 架构层级 | 核心模块 / 技术 | 职责说明 |
+| :--- | :--- | :--- |
+| **1. 协议交互层**<br>*(MCP Interface)* | `@modelcontextprotocol/sdk`<br>(stdio 管道 / JSON-RPC 2.0) | 统一对接各类 AI 客户端（Cursor、Claude、VS Code 等），暴露 `search_vault`、`read_vault_file` 等标准接口 |
+| **2. 混合检索层**<br>*(Hybrid Search)* | • 关键词：SQLite FTS5 (BM25)<br>• 语义向量：`bge-small-zh-v1.5` (ONNX)<br>• 排序融合：RRF 算法 | 结合精准词频倒排匹配与 512 维向量余弦相似度，避免单一检索方式漏查或不准，加权计算综合排名 |
+| **3. 解析与关联层**<br>*(Parser & Binding)* | • Markdown 大纲感知切片器<br>• 双生文件探测器 (`twinBinder`) | 按 `#` 标题层级维护面包屑路径；保护 LaTeX 公式与代码块不被截断；自动检测同名原版 `.pdf` 并附带路径引用 |
+| **4. 存储与监听层**<br>*(Storage & Watcher)* | • SQLite (`.vault_index.db`)<br>• Chokidar 文件监听器 | 单文件本地持久化（文本切片 + 二进制 BLOB 向量）；监听文件保存修改与删除事件，实现增量热更新 |
 
 ---
 
