@@ -2,12 +2,13 @@
 
 <div align="center">
 
-**面向 Cursor / VS Code / Claude Desktop 的本地隐私优先知识库 MCP 服务器**  
+**面向 ChatGPT / Cursor / VS Code / Claude Desktop 的本地隐私优先知识库 MCP 服务器**  
 *原生适配 MinerU 学术工作流 · 双生 PDF 论文自动绑定 · BM25 + 本地向量 RRF 混合检索 · 毫秒级热重载*
 
 [![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
 [![MCP](https://img.shields.io/badge/Protocol-Anthropic%20MCP-purple.svg)](https://modelcontextprotocol.io/)
+[![ChatGPT Compatible](https://img.shields.io/badge/AI-ChatGPT%20%7C%20Claude%20%7C%20Cursor-orange.svg)](https://openai.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 [English](./README_EN.md) | **简体中文**
@@ -24,6 +25,7 @@
 3. **传统 PDF 提取惨不忍睹**：普通程序直接读取 PDF 会导致双栏文字错乱、数学公式变成乱码。
 
 **Vault-MCP 专为解决上述痛点而生：**
+* 🌐 **全生态 Agent 通用**：遵循通用 MCP 标准协议，**ChatGPT (Desktop/MCP Bridge)**、**Cursor**、**Claude Desktop**、**VS Code (Cline/Roo)**、**Windsurf** 等全生态 AI 助手随插即用！
 * 🔒 **100% 纯本地离线**：零 API Key 需求，零云端调用，单文件 SQLite 持久化，保护隐私。
 * 📖 **首创“双生文件智能绑定 (Twin-File Binding)”**：针对科研人员阅读原版 PDF、同时使用 MinerU 转换高质量 Markdown 的习惯，AI 在检索笔记切片的同时，**自动提供原版论文 PDF 的本地直达路径**！
 * 📐 **数学公式与代码块保护**：智能切片器严格保护 `$$...$$` 跨行 LaTeX 公式与 ` ``` ` 代码块，绝不在核心逻辑处横腰截断。
@@ -36,7 +38,7 @@
 
 ```
 +---------------------------------------------------------------------------------+
-|                         AI 客户端 (Cursor / VS Code / Claude Desktop)           |
+|                   AI 客户端 (ChatGPT / Cursor / VS Code / Claude Desktop)       |
 +---------------------------------------------------------------------------------+
                                         |  标准输入输出 (stdio 管道)
                                         |  JSON-RPC 2.0 (MCP 规范)
@@ -66,9 +68,9 @@
 
 ---
 
-## 🚀 极速上手
+## 🚀 极速配置指南
 
-### 1. 克隆与安装依赖
+### 1. 克隆与构建
 
 ```bash
 git clone https://github.com/your-username/vault-mcp.git
@@ -77,40 +79,35 @@ npm install
 npm run build
 ```
 
-### 2. 在 Cursor 中配置使用
+### 2. 客户端配置
 
-打开 Cursor 设置面板：
-1. 前往 **Settings** ➔ **Features** ➔ **MCP Servers**；
-2. 点击 **+ Add New MCP Server**；
-3. 填入以下配置：
-   * **Name**: `vault-mcp`
-   * **Type**: `command`
-   * **Command**: `node /绝对路径/vault-mcp/dist/index.js --path /你的本地知识库路径/`
-
-或者直接编辑 Cursor 的 `mcp.json` 配置文件：
-
+#### 🤖 在 ChatGPT / OpenAI Agent 中使用
+通过标准 MCP 适配网关（如 `mcp-proxy` 或 ChatGPT 桌面客户端开发者模式）：
 ```json
 {
   "mcpServers": {
     "vault-mcp": {
       "command": "node",
-      "args": [
-        "D:/projects/vault-mcp/dist/index.js",
-        "--path",
-        "D:/Notes/MyObsidianVault"
-      ]
+      "args": ["D:/projects/vault-mcp/dist/index.js", "--path", "D:/Notes/MyVault"]
     }
   }
 }
 ```
 
-保存后，Cursor 中将亮起绿色连接指示灯！
+#### 💻 在 Cursor / VS Code (Cline 插件) 中使用
+打开设置 ➔ **Features** ➔ **MCP Servers**，添加命令：
+```bash
+node "D:/projects/vault-mcp/dist/index.js" --path "D:/Notes/MyVault"
+```
+
+#### 💬 在 Claude Desktop 中使用
+在 `%APPDATA%\Claude\claude_desktop_config.json` 中添加配置即可随插即用。
 
 ---
 
 ## 💬 实际使用效果
 
-在 Cursor 中像往常一样对话，AI 会自动按需调用你的本地知识库：
+在 ChatGPT 或 Cursor 中提问，AI 会自动按需调用你的本地知识库：
 
 > **用户**：*“我那篇 Transformer 论文里提到的 Multi-Head Attention 计算公式是怎样的？”*
 >
