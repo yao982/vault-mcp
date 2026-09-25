@@ -34,7 +34,7 @@ const watcher = new VaultFileWatcher(vaultRoot, indexer, db);
 // 3. 注册 MCP Server 与工具接口
 const server = new McpServer({
   name: "vault-mcp",
-  version: "0.4.0"
+  version: "0.1.0"
 });
 
 // Tool 1: ping_vault
