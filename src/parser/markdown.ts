@@ -26,10 +26,11 @@ export function parseAndChunkMarkdown(rawText: string, targetChunkSize = 800): M
     return headingStack.map((h) => h.title).join(" > ");
   }
 
-  let inCodeBlock = false;
+  let codeFence: { marker: string; length: number } | null = null;
   let inMathBlock = false;
 
   let currentChunkLines: string[] = [];
+  let currentLength = 0;
   let currentStartLine = 1;
 
   function flushChunk(endLine: number) {
@@ -43,6 +44,7 @@ export function parseAndChunkMarkdown(rawText: string, targetChunkSize = 800): M
       });
     }
     currentChunkLines = [];
+    currentLength = 0;
     currentStartLine = endLine + 1;
   }
 
@@ -51,15 +53,18 @@ export function parseAndChunkMarkdown(rawText: string, targetChunkSize = 800): M
     const lineNum = i + 1;
     const trimmed = line.trim();
 
-    // 1. 检查代码块标记 ```
-    if (trimmed.startsWith("```")) {
-      inCodeBlock = !inCodeBlock;
+    // A fence closes only with the same marker and at least the opening length.
+    const fence = !inMathBlock ? line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/) : null;
+    if (fence && (!codeFence || (fence[1][0] === codeFence.marker &&
+        fence[1].length >= codeFence.length && fence[2].trim() === ""))) {
+      codeFence = codeFence ? null : { marker: fence[1][0], length: fence[1].length };
       currentChunkLines.push(line);
+      currentLength += line.length + 1;
       continue;
     }
 
     // 2. 检查多行数学公式块标记 $$
-    if (!inCodeBlock && trimmed.startsWith("$$")) {
+    if (!codeFence && trimmed.startsWith("$$")) {
       // 如果一行里同时包含两个 $$（如 $$ E = mc^2 $$），则不算跨行
       if (trimmed.length > 2 && trimmed.endsWith("$$")) {
         // 单行独立公式
@@ -67,11 +72,12 @@ export function parseAndChunkMarkdown(rawText: string, targetChunkSize = 800): M
         inMathBlock = !inMathBlock;
       }
       currentChunkLines.push(line);
+      currentLength += line.length + 1;
       continue;
     }
 
     // 3. 在非代码块、非公式块状态下，检查大纲标题 (#, ##, ###)
-    if (!inCodeBlock && !inMathBlock) {
+    if (!codeFence && !inMathBlock) {
       const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
       if (headingMatch) {
         const level = headingMatch[1].length;
@@ -90,15 +96,16 @@ export function parseAndChunkMarkdown(rawText: string, targetChunkSize = 800): M
 
         currentStartLine = lineNum;
         currentChunkLines.push(line);
+        currentLength += line.length + 1;
         continue;
       }
     }
 
     currentChunkLines.push(line);
+    currentLength += line.length + 1;
 
     // 4. 如果当前累积的文本长度超过目标大小，且不在代码块或公式块内部，可在段落空行处进行切分
-    const currentLength = currentChunkLines.reduce((acc, l) => acc + l.length + 1, 0);
-    if (!inCodeBlock && !inMathBlock && currentLength >= targetChunkSize && trimmed === "") {
+    if (!codeFence && !inMathBlock && currentLength >= targetChunkSize && trimmed === "") {
       flushChunk(lineNum);
     }
   }

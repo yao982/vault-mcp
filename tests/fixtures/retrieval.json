@@ -1,0 +1,39 @@
+{
+  "documents": [
+    {
+      "path": "synthetic/hydraulic_control.md",
+      "content": "# 合成测试资料：液压伺服控制\n\n本文件由检索测试编写，仅用于验证本地语义检索，不是科研数据或实验结论。\n\n## 液压缸位置跟踪\n液压伺服系统常见的控制目标是让液压缸活塞杆的位置跟踪给定参考轨迹。控制器读取期望位移与实际位移，两者之差是位置跟踪误差。压力传感器和位移传感器提供状态反馈，控制输出可以改变伺服阀的阀芯开口。\n\n## 自适应控制与参数更新\n当液压负载、油液黏度或模型参数发生变化时，自适应控制器根据跟踪误差更新控制参数。参数更新律需要结合误差和回归量设计，并通过 Lyapunov 稳定性分析检查闭环误差是否有界。自适应控制不是无条件地保证所有误差立即变成零。\n\n## 阀控缸压力与流量\n阀控缸模型描述伺服阀流量、两个缸腔压力和活塞运动之间的关系。压力传感器测量缸腔压力，位移传感器测量活塞位置。阀口流量随阀芯位移和压差变化，供油压力与回油压力也会影响执行器响应。\n\n## 摩擦与泄漏补偿\n液压执行器的密封摩擦会产生低速爬行和跟踪误差，内泄漏会改变有效流量。模型补偿项可以估计摩擦力或泄漏影响，再加入控制输入以改善跟踪性能。补偿效果依赖参数估计、传感器噪声和工况，不能把补偿模型当成实际测量值。"
+    },
+    {
+      "path": "synthetic/graph_algorithms.md",
+      "content": "# 合成测试资料：图算法\n\n本文件由检索测试编写，仅用于验证本地语义检索，不是课程标准或实验数据。\n\n## 无权图的广度优先搜索\n广度优先搜索 BFS 使用先进先出的队列，按离起点的层数访问顶点。在无权图中，BFS 首次到达某个顶点时得到从起点到它的最少边数路径。\n\n## 非负权图的 Dijkstra 算法\nDijkstra 算法用于边权非负的加权图单源最短路径。算法反复选择当前暂定距离最小的未确定顶点，再松弛它的出边。普通 Dijkstra 不适用于存在负权边的一般图。\n\n## 深度优先搜索与栈\n深度优先搜索 DFS 沿一条分支继续访问，直到无法前进再回溯。递归调用栈可以保存尚未完成的搜索状态，也可以显式使用栈实现迭代版 DFS。"
+    }
+  ],
+  "positiveQueries": [
+    { "question": "C语言中，指针变量保存的核心内容是什么？", "expectedPath": "notes/c_language_pointers.md" },
+    { "question": "如何销毁堆中空间", "expectedPath": "notes/c_language_pointers.md" },
+    { "question": "调用 malloc 申请堆内存后怎样释放以避免内存泄漏？", "expectedPath": "notes/c_language_pointers.md" },
+    { "question": "free 之后把指针设成 NULL 可以避免什么问题？", "expectedPath": "notes/c_language_pointers.md" },
+    { "question": "C语言动态内存的 malloc 和 free 如何配合使用？", "expectedPath": "notes/c_language_pointers.md" },
+    { "question": "快速排序的 partition 函数把哪个元素选作 pivot 基准值？", "expectedPath": "code/quicksort.c" },
+    { "question": "分区时小于 pivot 的数组元素会被交换到哪一侧？", "expectedPath": "code/quicksort.c" },
+    { "question": "快速排序递归处理基准元素左右两边的哪些区间？", "expectedPath": "code/quicksort.c" },
+    { "question": "Transformer 如何避免循环神经网络逐时间步计算带来的并行限制？", "expectedPath": "papers/attention_is_all_you_need.md" },
+    { "question": "Scaled dot-product attention 要用什么量对 QK 转置的点积做缩放？", "expectedPath": "papers/attention_is_all_you_need.md" },
+    { "question": "多头注意力把查询键和值投影到什么不同空间？", "expectedPath": "papers/attention_is_all_you_need.md" },
+    { "question": "缩放注意力里的除以根号 d_k 如何帮助 softmax 梯度？", "expectedPath": "papers/attention_is_all_you_need.md" },
+    { "question": "液压伺服系统控制器希望活塞杆位置跟踪什么目标？", "expectedPath": "synthetic/hydraulic_control.md" },
+    { "question": "自适应控制器根据哪类误差信息更新模型参数？", "expectedPath": "synthetic/hydraulic_control.md" },
+    { "question": "阀控缸系统中的压力传感器测量哪些状态？", "expectedPath": "synthetic/hydraulic_control.md" },
+    { "question": "液压执行器的摩擦与内泄漏补偿项用于改善什么性能？", "expectedPath": "synthetic/hydraulic_control.md" },
+    { "question": "无权图从起点寻找最少边数路径应该用 BFS 还是队列？", "expectedPath": "synthetic/graph_algorithms.md" },
+    { "question": "边权都非负时哪种算法求加权图单源最短路？", "expectedPath": "synthetic/graph_algorithms.md" },
+    { "question": "深度优先搜索可以通过递归调用栈或显式什么结构实现？", "expectedPath": "synthetic/graph_algorithms.md" }
+  ],
+  "minimumRecallAt3": 0.8,
+  "noAnswerQueries": [
+    "火星基地的氧气循环设备应使用哪种催化剂配方？",
+    "SQLite WAL checkpoint 在这个资料库里返回了多少个页？",
+    "苹果树叶片病斑应该喷洒多少毫升的农药？"
+  ]
+}

@@ -1,124 +1,146 @@
-# 从 C 语言到现代软件工程：Vault-MCP 专属极简学习指南
+# 从 C 语言理解 Vault-MCP 0.5.0
 
-> **写在前面**：  
-> 如果你学过 C 语言，你其实已经掌握了计算机最硬核的本质（变量、内存、控制流、函数调用）。  
-> 现代高级语言（如 TypeScript）和现代工程并不是什么高不可攀的魔法，它们只是在 C 语言的基础上**套了一层极其舒适的“防弹衣”与“自动化工具箱”**。  
-> 这份指南将以你熟悉的 C 语言为锚点，带你平滑过渡到现代 TypeScript 与 MCP 知识库开发中。
+这份指南以学过 C 语言、刚接触 TypeScript 的读者为对象。先明确系统：输入是知识库文本和查询；中间经过分块、索引、检索；输出是带路径和行号的候选片段。MCP 负责客户端与工具交换消息，不负责替你判断论文结论是否正确。
 
----
+## 1. 代码怎么执行
 
-## 1. 认知颠覆：C 语言与 TypeScript 是如何运行的？
+C 的典型流程是源文件 → 预处理 → 编译 → 汇编 → 链接 → 可执行文件。优化后并非每一行源码都对应一条固定机器指令。
 
-### 在 C 语言中：
-* 你写的是 `.c` 文件。
-* 过程：`main.c` ➔ **预处理器 (gcc -E)** ➔ **编译器 (gcc -S)** ➔ **汇编器** ➔ **链接器 (ld)** ➔ 机器指令文件 `main.exe`。
-* 计算机 CPU 直接执行这个二进制文件，每一行代码直接对应寄存器与内存操作。
+本项目的流程是 `.ts` → `tsc` 类型检查并生成 `.js` → Node.js 执行。Node.js 使用 V8 执行 JavaScript，包含解释和即时编译等机制。TypeScript 的多数类型信息在生成 JavaScript 时被擦除，因此接口声明不能替代运行时输入校验。开发工具 `tsx` 可以直接运行 TypeScript，但运行成功本身不证明类型检查通过；还要执行 `npm run build`。
 
-### 在 TypeScript / Node.js 中：
-* 你写的是 `.ts` 文件（带强类型的现代 JavaScript）。
-* 过程：
-  1. **TypeScript 编译器 (tsc)** 把 `.ts` 文件翻译成标准的 `.js` (JavaScript)。
-  2. **Node.js 运行时**（底层由 Google 用 C++ 编写的 V8 引擎驱动）读取 `.js` 代码，边解释边执行（JIT 即时编译为机器码）。
-* **现在的极简体验**：我们用工具 `tsx`，可以像脚本一样直接 `npx tsx src/index.ts` 跑起来，连手动编译这步都自动省去了。
+## 2. C 与 TypeScript 的相似处和边界
 
----
+| 概念 | C | TypeScript / Node.js | 需要记住的限制 |
+| :--- | :--- | :--- | :--- |
+| 数值 | `int`、`float`、`double` | 普通数值主要用 `number` | `number` 通常是 IEEE 754 双精度浮点数，整数并非无限精确 |
+| 大整数 | 依赖类型宽度或专用库 | `bigint`，如 `123n` | 不能直接与 `number` 混算；默认 JSON 序列化不接受 BigInt |
+| 字符串 | `char*`、字符数组 | `string` | 不可变，长度按 UTF-16 码元计数；不总等于汉字/emoji 的数量 |
+| 数据结构 | `struct` | `interface` 描述形状，对象保存数据 | 接口不是运行时验证器 |
+| 内存 | `malloc` / `free` | 垃圾回收 GC | 不可达对象才可能回收，仍有内存泄漏风险 |
+| 共享对象 | 指针 | 变量保存对象引用 | 参数按值传递，传入的值可以是对象引用 |
+| 模块 | `#include`、链接库 | `import`、npm 依赖 | 两者构建与执行机制不同，不能逐项等同 |
 
-## 2. 核心概念“同义词对照表” (C vs TypeScript)
+### 数值：为什么不能说“不再溢出”
 
-| 概念         | C 语言                                          | TypeScript / Node.js                               | 说明与优势                                                  |
-| :--------- | :-------------------------------------------- | :------------------------------------------------- | :----------------------------------------------------- |
-| **整型/浮点型** | `int`, `long`, `float`, `double`              | 全部统一为 `number`                                     | 再也不用纠结会不会爆 `int` 或溢出                                   |
-| **字符串**    | `char*`, `char str[100]`，以 `\0` 结尾            | `string`                                           | 自带长度，任意拼接 `str1 + str2`，不会越界                           |
-| **结构体**    | `struct Note { char title[50]; int words; };` | `interface Note { title: string; words: number; }` | 语法极其相似，定义数据的形状                                         |
-| **动态内存管理** | `malloc(sizeof(T))` 和 `free(ptr)`             | `new MyClass()` / 直接字面量声明                          | **无须手动 free！** Node.js 垃圾回收器（GC）会自动回收无用内存，彻底告别野指针与内存泄漏 |
-| **指针操作**   | `int *p = &a; *p = 10;`                       | 没有裸指针语法！对象/数组天然是引用传递                               | 像指针一样高效共享数据，但杜绝了段错误 (Segmentation Fault)               |
-| **头文件与源码** | `#include <stdio.h>`                          | `import { readFile } from 'fs/promises';`          | 更加现代化的模块化系统                                            |
-| **编译工程管理** | `Makefile` 或 `CMakeLists.txt`                 | `package.json`                                     | 声明项目元信息、外部依赖包和运行脚本                                     |
-
----
-
-## 3. 思维大飞跃：从“同步阻塞”到“异步非阻塞 (Async/Await)”
-
-这是从 C 语言切换到现代 Web / Node.js **最关键的一道坎**。
-
-### C 语言的阻塞模型：
-```c
-// 在 C 中读一个 1GB 的文件，程序会死死卡在这一行，CPU 闲着等待磁盘读取完毕
-FILE *fp = fopen("big_file.txt", "r");
-fread(buffer, 1, 1024, fp); 
-printf("读取完毕\n"); // 必须等上面读完才执行
-```
-
-### TypeScript 的异步模型（事件循环 Event Loop）：
-Node.js 是单线程的，为了不让耗时的磁盘读写或网络请求把整个程序卡死，它采用了**异步机制**：
+`Number.MAX_SAFE_INTEGER` 是 `2 ** 53 - 1`，即 9007199254740991。超过这个整数范围，某些相邻整数会得到相同表示：
 
 ```typescript
-// 读文件是异步的，Node.js 会告诉操作系统去读，自己不干等
-// 加上 await 关键字，意思是：等操作系统读完，再把结果给我，语法上依然像同步一样优雅
-const content = await readFile("big_file.txt", "utf-8");
-console.log("读取完毕");
+console.log(9007199254740992 === 9007199254740993); // true：两者已舍入
+console.log(9007199254740992n === 9007199254740993n); // false
+console.log(0.1 + 0.2 === 0.3); // false：二进制浮点舍入
 ```
-* **一句话口诀**：只要涉及**读磁盘、查数据库、网络通信**的函数，名字前面通常要加 `await`，所在的函数外面要加 `async`。
 
----
+工程上，数据库标识符、大整数计数应明确表示方式；本项目向量使用 `Float32Array`，每个分量是 32 位浮点数。相似度比较应容许数值误差，不应要求所有归一化结果精确等于 1。
 
-## 4. 彻底揭秘：MCP 底层就是 C 语言的 `stdin` 和 `stdout`！
+### 引用：修改属性和替换变量不同
 
-很多初学者觉得 MCP (Model Context Protocol) 是神秘的高科技，其实只要你学过 C 语言，它的底层原理你第一天就学过！
+```typescript
+const note = { title: "初稿" };
+function edit(value: { title: string }) {
+  value.title = "修改后";  // 通过复制来的引用，修改同一对象
+  value = { title: "新对象" }; // 仅替换局部变量保存的引用
+}
+edit(note);
+console.log(note.title); // 修改后
+```
 
-在 C 语言中：
-* `scanf("%s", buf);` ➔ 从**标准输入 (stdin)** 读取数据。
-* `printf("Hello World\n");` ➔ 向**标准输出 (stdout)** 打印数据。
+所以“对象按引用传递”容易造成误解。准确说法是：**按值传递，复制的是对象引用**。同理，GC 也不会自动清空你仍保存在全局 `Map` 中的对象。监听器未注销、缓存无限增长、文件句柄未关闭都需要工程管理；数据库和监听器要在停机时关闭。
 
-**MCP 的标准通信模式（stdio 模式）底层完全一模一样：**
-1. Cursor 在后台启动你的 Node.js 程序，通过管道接管了你的 `stdin` 和 `stdout`。
-2. 当 AI 想查知识库时，Cursor 往你的 `stdin` 发送一行 JSON 字符串：
-   ```json
-   {"jsonrpc":"2.0","method":"tools/call","params":{"name":"search_vault","arguments":{"query":"指针"}}}
-   ```
-3. 你的程序在 `stdin` 收到这句话，解析它，查 SQLite 数据库，然后用类似于 `printf` 的方式向 `stdout` 输出一行结果：
-   ```json
-   {"jsonrpc":"2.0","result":{"content":[{"type":"text","text":"在 C 语言中，指针保存的是内存地址..."}]}}
-   ```
-4. Cursor 读取到你的回答，交给大模型组织成自然语言回答用户。
+## 3. 同步、异步和线程
 
-> **看到这里是不是完全通透了？** MCP 没有任何魔法，它就是一个“遵循标准 JSON 格式的命令行交互程序”。
+C 的同步读取例子：
 
----
+```c
+#include <stdio.h>
+int main(void) {
+    char buffer[1024];
+    FILE *fp = fopen("notes.txt", "rb");
+    if (fp == NULL) return 1;
+    // 最多读取 1024 字节；返回实际读到的字节数，不是读取 1GB。
+    size_t n = fread(buffer, 1, sizeof buffer, fp);
+    if (ferror(fp)) { fclose(fp); return 1; }
+    printf("读取了 %zu 字节\n", n);
+    fclose(fp);
+    return 0;
+}
+```
 
-## 5. 本地环境搭建速查表 (Windows 环境)
+JavaScript 通常在一个事件循环线程上执行，但 **Node.js 进程并非只有一个线程**：部分 I/O 会使用操作系统异步机制或 libuv 线程池，原生库也可能有工作线程。
 
-为了开始开发，你只需要在 Windows 上准备好以下 3 样东西：
+```typescript
+import { readFile } from "node:fs/promises";
+const content = await readFile("notes.txt", "utf8");
+console.log(content.length);
+```
 
-### 1) 安装 Node.js 运行时
-* **什么是 Node.js**：它就是 JavaScript 的“GCC / 解释器”。
-* **下载地址**：前往 [Node.js 官方网站](https://nodejs.org/) 下载 **LTS (长期支持版)**，下载 `.msi` 安装包，一路点击 Next 安装。
-* **验证**：按 `Win + R` 输入 `powershell`，在终端输入：
-  ```bash
-  node -v
-  npm -v
-  ```
-  如果能看到版本号（如 `v20.x.x`），说明环境准备完毕。
+`await` 暂停当前异步函数的后续执行，等待 Promise 完成；可让事件循环处理其他可运行任务。它不保证 CPU 工作自动并行，也不会把同步 API 变成异步：
 
-### 2) 认识 `npm` 包管理器
-* C 语言里如果想用某个第三方库（如 cJSON），通常要手动下载 `.h` 和 `.c` 文件，或者自己编译链接 `.lib` / `.so`。
-* Node.js 自带的 `npm` 是现代化的包管理器。想要什么库，一行命令自动从云端下载：
-  ```bash
-  npm install @modelcontextprotocol/sdk  # 下载 MCP 官方开发库
-  npm install better-sqlite3             # 下载 SQLite 数据库操作库
-  ```
+```typescript
+import { readFileSync } from "node:fs";
+async function stillBlocks() {
+  const content = readFileSync("notes.txt", "utf8"); // 仍阻塞当前线程
+  return content;
+}
+```
 
-### 3) 代码编辑器
-* 你目前打算在 Cursor 或 VS Code 中使用，建议直接在其中安装推荐插件：
-  * **ESLint**（语法检查）
-  * **Prettier**（代码自动格式化）
-  * **SQLite Viewer**（可以直接在编辑器里点击查看 SQLite 数据库文件里的内容）
+本项目的 `better-sqlite3` 是同步接口。给数据库调用前加 `await` 并不能消除查询期间的阻塞。判断是否需要 `await`，应看函数返回的是否是需要等待的 Promise，而不是看函数名称是否涉及磁盘或数据库。
 
----
+模型初始化还有一个常见并发问题：调用 A 正在加载模型时，调用 B 不能因为“正在加载”就直接继续。让 A、B 等待**同一个初始化 Promise**，才能保证两者取向量时模型都已经准备好。失败后清理该 Promise，才允许后续重试。
 
-## 6. 后续上手实操指引
+## 4. MCP 与标准输入输出
 
-不用担心记不住语法，开发时我们会：
-1. **先搭骨架**：一步步生成 `package.json`，运行一个 20 行代码的极简 MCP Hello-World。
-2. **循序渐进**：每写一个模块（如 SQLite 建表、Markdown 分块、搜索函数），我都用 C 语言的概念帮你类比并提供清晰的注释。
-3. **及时验证**：在终端里随时用脚本测试单一功能，确保每一步都有正向反馈！
+本项目选择 stdio transport。stdio 是 MCP 的一种传输方式，并非 MCP 的全部定义；协议还包括初始化、能力协商、工具描述和调用等内容。
+
+客户端启动 Node.js 子进程，经标准输入发送 JSON-RPC 请求，经标准输出接收响应。下面是简化的工具调用示意，省略初始化过程：
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_vault","arguments":{"query":"指针"}}}
+```
+
+```json
+{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"候选片段：指针保存地址……"}]}}
+```
+
+请求和响应的 `id` 对应，才能区分同时发出的调用。通知没有 `id`，不应期待它像请求一样返回响应。不要在服务器中随意 `console.log` 调试：它写入 stdout，可能破坏协议；诊断应写 stderr，例如 `console.error`。
+
+## 5. 从文字到候选片段
+
+关键词检索和向量检索是两条不同路径。关键词关心词元是否出现，向量关心模型表示之间的距离。
+
+中文连续文本用默认 `unicode61` 容易出现子词漏检。项目额外生成汉字单字与相邻双字，例如“液压控制”产生双字“液压、压控、控制”；查询“控制”能匹配对应词元。这不是词典分词。查询多个双字时要求它们共同出现，也不保证它们在原文中连续、顺序相同。
+
+向量模型不能无限接收文本。这里先按 tokenizer 实际长度把原始切片正文 `chunk.content` 分成可处理窗口；正文中原有的本节标题保留，但不再重复拼接祖先标题路径 `headingPath`。标题路径仍用于关键词检索和结果出处。字符数不等于 token 数，英文、中文和代码的比例不同，所以不能用“512 字符”直接代替模型长度限制。
+
+为什么不把标题反复补到向量输入？上下文不一定越多越好。集成阶段用真实模型查询“如何销毁堆中空间”：重复拼接标题时，`free` 示例相似度约 0.4018，低于 `attention` 示例的 0.4432；仅保留原切片内容时，前者约 0.4825，高于后者的 0.4481。因此本项目选择不重复拼接标题。这是同一查询和样本的对照依据，不代表所有查询都会改善，也不是准确率评测。
+
+每个窗口取 CLS 表示，归一化得到向量 `v_i`，令 `w_i` 为其有效 token 数。聚合为：
+
+```text
+u = (Σ w_i × v_i) / (Σ w_i)
+v = u / ||u||₂
+cosine(q, v) = q · v       （q、v 均为单位向量时）
+```
+
+遇到零范数或非有限值必须按错误处理，不能产生 NaN 向量写入数据库。全文窗口参与平均，解决了“只看开头”的覆盖缺陷；但一段很短的重要结论仍可能被长正文稀释。**全文参与计算不等于每个细节一定被搜到。**
+
+RRF 根据两条候选列表的名次加分，例如每路贡献 `1 / (60 + rank)`。某片段两路都靠前，就获得更多排序分。这里的 60 是平滑排名的参数，不是置信阈值；RRF 分数不是“答案正确的概率”。没有相关资料时，向量前几名仍可能出现，因此需要打开原文核对。
+
+## 6. 在本项目中做三个验证
+
+需要 Node.js >= 22。安装后用 `node -v` 和 `npm -v` 确认环境；执行 `npm install` 安装已有依赖，无需逐个添加库。
+
+```bash
+npm test
+npm run test:integration
+npm run build
+```
+
+第一项是离线单元回归，第二项使用事先缓存的真实模型，第三项检查 TypeScript 构建。测试替身能证明接口和流程满足断言，不能独自证明真实模型语义效果；使用真实模型也不能凭一个查询宣称普遍准确。
+
+练习时可以验证：
+
+1. 将 `VAULT_EMBEDDINGS=off` 设给 MCP 服务进程，查询“控制”，观察关键词候选；随后读取原文。
+2. 在笔记尾部放一个独特术语，保存后检查索引状态与结果。先验证关键词覆盖，再单独观察真实向量排序，避免把关键词命中误算为语义成功。
+3. 停止服务后删除一份测试笔记，再启动，确认统计和检索不再保留旧记录。用自建临时笔记练习，不要删除真实资料。
+
+`VAULT_OFFLINE=1` 只约束模型不下载，不意味着客户端不会联网。`sample_vault` 的 66 字节 PDF 只是路径测试占位文件，不能作为论文解析成功的证据。索引、模型与客户端是三个层次，验证时应分别记录。

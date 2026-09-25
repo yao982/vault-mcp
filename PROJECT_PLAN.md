@@ -1,46 +1,72 @@
-# Vault-MCP: 本地智能知识库 MCP 服务项目规划与进度跟踪
+# Vault-MCP 0.5.0：实现边界与验收记录
 
-> **项目名称**：`vault-mcp`  
-> **定位**：面向 Cursor / VS Code 的轻量级本地知识库检索服务（聚焦 Markdown 笔记与源代码，原生适配 MinerU 学术工作流）  
-> **核心协议**：Anthropic Model Context Protocol (MCP)  
-> **开发语言**：TypeScript / Node.js (v24+)  
-> **存储与检索引擎**：SQLite (FTS5 BM25 全文索引 + 512 维本地向量存储)  
-> **AI 语义模型**：`Xenova/bge-small-zh-v1.5` (纯 CPU 本地 ONNX 离线推理，零显存占用)  
-> **当前状态**：🎉 **项目研发与开源工程化已全部圆满完成！已具备公开发布至 GitHub 的所有条件。**
+项目面向个人知识库：Markdown、文本和源代码检索；PDF 只关联路径。运行要求为 Node.js >= 22，使用 TypeScript、MCP stdio、SQLite FTS5 与本地 `Xenova/bge-small-zh-v1.5`。本文件区分修复目标和实测证据，不能以勾选项替代执行记录。
 
----
+## 本次修复交付范围
 
-## 🚦 项目研发全里程碑看板 (All Milestones Completed!)
-
-| 阶段 / 任务模块 | 核心工作内容 | 对应核心代码 | 状态 | 实测验证说明 |
-| :--- | :--- | :--- | :---: | :--- |
-| **Milestone 1: MCP 基础骨架** | Node.js 与 TS 环境初始化，实现基于 stdio 管道的 MCP 服务握手与基础 Tools | [`src/index.ts`](./src/index.ts) | ✅ **已完成** | 成功通过 Agent 客户端握手测试，可正常调用 `ping_vault` 和 `get_vault_stats` |
-| **Milestone 2: SQLite 存储与大纲切片** | 设计 SQLite 表结构，开发 Markdown 标题感知切片器，保护代码与 LaTeX 公式不被截断 | [`src/storage/db.ts`](./src/storage/db.ts)<br>[`src/parser/markdown.ts`](./src/parser/markdown.ts) | ✅ **已完成** | 完成 `sample_vault` 索引，大纲面包屑精准，公式块完好 |
-| **Milestone 3: 双生文件智能绑定** | 扫描 Markdown 时自动探测同级同名 `.pdf` 原版论文，并注入关联路径元数据 | [`src/parser/twinBinder.ts`](./src/parser/twinBinder.ts) | ✅ **已完成** | 检索 MinerU 论文时自动附加原版 PDF 引用路径 |
-| **Milestone 4: 本地神经向量引擎** | 引入 `bge-small-zh-v1.5`，切片转 512 维浮点数向量，以二进制 BLOB 存入 SQLite | [`src/storage/embedding.ts`](./src/storage/embedding.ts) | ✅ **已完成** | 纯 CPU 离线计算，数据库仅 36KB，计算速度毫秒级 |
-| **Milestone 5: RRF 工业级混合检索** | 实现倒数排名融合算法（BM25 关键词排名 + 向量余弦相似度排名加权融合） | [`src/storage/db.ts`](./src/storage/db.ts) | ✅ **已完成** | **通过盲测**：搜索“如何销毁堆中空间”跨越词汇障碍精准定位 `free()` |
-| **Milestone 6: 实时文件热重载** | 集成 `chokidar` 监听器，用户保存或新增笔记时 100ms 增量热更新索引，删除文件自动清理 | [`src/watcher/fileWatcher.ts`](./src/watcher/fileWatcher.ts) | ✅ **已完成** | **实测通过**：动态新建量子力学笔记，不到 1 秒内完成热重载并被检索出；删除后自动同步清理 |
-| **Milestone 7: 开源工程化与发布** | 编写中英文 README、配置 Git 忽略文件（`.gitignore`）、添加开源 MIT License | [`.gitignore`](./.gitignore)<br>[`LICENSE`](./LICENSE)<br>[`README.md`](./README.md) | ✅ **已完成** | 中英文双语说明、架构拓扑图、快速配置示例齐备 |
-
----
-
-## 1. 核心架构设计分层表
-
-| 架构层级 | 核心模块 / 技术 | 职责说明 |
+| 模块 | 约定行为 | 验收关注点 |
 | :--- | :--- | :--- |
-| **1. 协议交互层**<br>*(MCP Interface)* | `@modelcontextprotocol/sdk`<br>(stdio 管道 / JSON-RPC 2.0) | 统一对接各类 AI 客户端（Cursor、Claude、VS Code 等），暴露 `search_vault`、`read_vault_file` 等标准接口 |
-| **2. 混合检索层**<br>*(Hybrid Search)* | • 关键词：SQLite FTS5 (BM25)<br>• 语义向量：`bge-small-zh-v1.5` (ONNX)<br>• 排序融合：RRF 算法 | 结合精准词频倒排匹配与 512 维向量余弦相似度，避免单一检索方式漏查或不准，加权计算综合排名 |
-| **3. 解析与关联层**<br>*(Parser & Binding)* | • Markdown 大纲感知切片器<br>• 双生文件探测器 (`twinBinder`) | 按 `#` 标题层级维护面包屑路径；保护 LaTeX 公式与代码块不被截断；自动检测同名原版 `.pdf` 并附带路径引用 |
-| **4. 存储与监听层**<br>*(Storage & Watcher)* | • SQLite (`.vault_index.db`)<br>• Chokidar 文件监听器 | 单文件本地持久化（文本切片 + 二进制 BLOB 向量）；监听文件保存修改与删除事件，实现增量热更新 |
+| 协议与启动 | 保留 `ping_vault`、`get_vault_stats`、`search_vault`、`read_vault_file`；先 MCP 连接，再后台扫描 | 未完成索引时连接可用，状态明确，不把连接成功说成索引完成 |
+| 读取边界 | 基于真实路径限制在知识库内 | `..`、绝对路径越界和指向库外的符号链接不能读取 |
+| 索引复用 | 内容 hash + `INDEX_VERSION`；向量模式要求向量完整 | 未变化文件复用，算法变化重建，缺失向量可补建 |
+| 文件一致性 | 同文件串行处理、保存前快照确认 | 连续改写和删除不被旧异步计算覆盖；停机删除在扫描中清理 |
+| 关键词 | 英文词元和汉字单字/双字 `search_text` | 中文子词可召回，明确这是字符级检索而非自然语言分词 |
+| 向量 | 仅对原始 `chunk.content` 分 token 窗口，保留其中原有标题；CLS、按有效 token 数加权后 L2 归一化 | 不重复拼接祖先 `headingPath`；标题路径保留用于 FTS 与出处；全文含尾部参与，但聚合可能稀释局部主题 |
+| 模型生命周期 | 并发初始化等待同一 Promise，失败可重试，状态可观察 | 离线无缓存不伪称模型就绪；失败不造成向量与切片错位 |
+| 排序解释 | 保留 RRF，输出候选及来源 | 排名分不是相关概率，无关查询可能仍有向量候选 |
+| 运维模式 | `VAULT_EMBEDDINGS=off`；`VAULT_OFFLINE=1` | 分别验证关键词模式与仅缓存模型模式 |
+| 文档与示例 | 中英说明对齐，学习指南纠正概念，版本统一 0.5.0 | 不承诺固定模型体积、更新时间、检索准确率或未经执行的通过状态 |
 
----
+## 工程与数据边界
 
-## 2. GitHub 发布前本地自检清单
+SQLite 主文件是知识库内的 `.vault_index.db`，运行时可能有 WAL/SHM 文件，模型缓存另存。向量检索遍历向量，不承诺固定延迟。更新耗时包括监听等待和推理；没有“100ms 内一定可检索”的保证。
 
-- [x] TypeScript 代码编译通过，无任何语法与类型警告 (`npm run build`)
-- [x] 核心四工具全部通过真实客户端调用测试 (`ping_vault`, `get_vault_stats`, `search_vault`, `read_vault_file`)
-- [x] 盲测验证通过（语义向量精准命中无同词笔记）
-- [x] 实时文件增量更新与自动清理验证通过
-- [x] `.gitignore` 已排查私有数据库与庞大 `node_modules`
-- [x] MIT License 已就绪
-- [x] 中英文 `README.md` 与 `README_EN.md` 已就绪
+`sample_vault` 的 66 字节 PDF 为路径关联占位文件，不是真实论文，不能用于 PDF 解析、排版或内容正确性的验证。PDF 关联路径也不证明已校验论文内容。
+
+文本和向量处理在本机完成；接入的 AI 客户端仍可能把工具返回片段上传到云模型。`VAULT_OFFLINE=1` 仅控制模型缓存/下载行为，不能代表整个问答链路离线。
+
+## 输入表示的实测调整
+
+集成阶段对真实模型使用同一查询“如何销毁堆中空间”进行对照：重复拼接标题路径时，`free` 示例相似度约 0.4018，低于 `attention` 示例的 0.4432；仅编码原切片内容时，`free` 约 0.4825，高于 `attention` 的 0.4481。由此调整为不重复追加祖先标题，`headingPath` 仍参与关键词检索和结果出处。这项局部对照支持当前输入选择，不代表泛化质量保证，也不替代下方最终验收。
+
+## 验证层次
+
+| 命令 / 检查 | 能提供的证据 | 不能独自证明的内容 |
+| :--- | :--- | :--- |
+| `npm test` | 离线单元回归所覆盖的边界与流程 | 真实模型加载、真实客户端兼容性和普遍语义准确率 |
+| `npm run test:integration` | 真实缓存模型参与的集成行为 | 所有客户端、所有语料或网络下载均可用 |
+| `npm run build` | TypeScript 类型与构建检查 | 运行时检索质量和文件事件一致性 |
+| MCP stdio 调用 | 握手和四工具实际协议行为 | 所有桌面客户端的配置体验 |
+| 文档核对 | 命令、环境变量、版本和边界说明一致 | 未运行功能的执行成功 |
+
+真实模型测试应明确缓存是否存在、是否禁止下载、实际使用哪个模型。未执行、环境受限或失败的项目应原样记录，不能改写为通过。
+
+## 分阶段验收记录：2026-09-25
+
+本轮发布版本为 **0.5.0**。原 GitHub Release 为 v0.4.0，而对应代码版本为 0.1.0；本轮本地修复阶段暂用 0.2.0，发布时统一推进至 0.5.0，保留历史标签。验收环境：Windows、Node.js **v24.15.0**。未新增运行时依赖，模型使用现有本地缓存；所有运行测试使用临时知识库或示例副本。
+
+| 阶段 | 完成内容 | 实测证据 |
+| :--- | :--- | :--- |
+| 第一阶段：安全与一致性 | 真实路径边界、向量与切片固定位置对应、离线删除清理、同文件任务协调、提交前快照检查 | 越界路径与 Windows junction 被拒绝；连续更新和删除不会被旧任务覆盖；库内/库外目录链接替换不会阻断合法文件索引 |
+| 第二阶段：检索与启动 | 汉字词元索引、全文 token 分窗、CLS、旧向量迁移、模型共享初始化与失败退避、后台索引与缓存复用、候选措辞 | 真实缓存模型输出归一化的 512 维向量；前 512 字符相同而尾部不同的文本产生不同向量；原句“如何销毁堆中空间”在真实 MCP 调用中将 `free()` 所在切片排第一 |
+| 第三阶段：可维护交付 | 中英 README、入门指南、Node 要求、版本一致性、自动化回归和小型检索评测 | 下表记录最终命令结果；学习指南纠正数值精度、GC、对象引用值传递、异步与 MCP 通信示例 |
+
+| 最终检查 | 结果 |
+| :--- | :--- |
+| `npm test` | **34/34 通过，无跳过**；先执行源码和测试的严格类型检查，再运行数据库、模型替身、路径、解析、索引竞争、目录链接协调和实际 MCP/监听测试 |
+| `npm run test:integration` | **2/2 通过，无跳过**；使用真实 `Xenova/bge-small-zh-v1.5` 缓存，设置 `VAULT_OFFLINE=1` 禁止下载；包含编译后 `dist/index.js` 的 MCP 调用 |
+| `npm run build` | 通过，已生成本地 `dist/` 产物；集成命令运行前也会重新构建 |
+| 小型检索评测 | **19/19** 正向查询在前 3 条切片候选中含目标文档，文件级 Recall@3 = 1.000；数据来自 3 份示例文本及 2 份明确标注的合成测试文档 |
+| 无答案情形 | 3 条无答案查询记录了实际候选；真实 MCP 的“怎么做红烧肉”检查通过：输出说明仅为候选、可能没有答案，不宣称高相关或已回答 |
+| MCP 与文件生命周期 | 握手、四工具、只用关键词模式、行范围、无效参数、文件新增/修改/删除、PDF 关联新增/删除均通过实际调用 |
+| `git diff --check` | 通过；未发现补丁空白错误 |
+
+可复跑入口为 [package.json](./package.json)。小型检索题库在 [tests/fixtures/retrieval.json](./tests/fixtures/retrieval.json)，真实模型入口在 [tests/integration/retrieval.test.ts](./tests/integration/retrieval.test.ts)，MCP 模型集成在 [tests/integration/protocol-model.test.ts](./tests/integration/protocol-model.test.ts)。
+
+### 使用与后续方向
+
+重启使用 `dist/index.js` 的 MCP 客户端即可使用本次构建。首次启动旧知识库时，程序自动迁移派生索引并重新生成旧版本向量；不需要手动删除数据库。调用 `get_vault_stats` 查看 `indexing.state`、`indexing.pendingFiles`、`embedding.state` 和 `incompleteDocuments`。在只用关键词模式中，缺少向量是预期状态；启用向量后，未变化但向量不完整的文件仍会补建。
+
+下一阶段以真实个人资料试用为主：由使用者为固定问题标注应找到的文件/段落，再记录漏查和误召回。当前测试集较小，且文件级命中不等于找到了完整答案；不得将 19/19 写成通用准确率。尚未验证完整个人知识库、大规模性能、首次联网下载，或所有桌面客户端与其他操作系统。
+
+仍然保留的设计边界：中文字符词元不是自然语言分词；长文本聚合可能稀释局部主题；系统没有校准后的自动“无答案”判定器；PDF 不解析；模型在本地运行不控制云端客户端如何使用返回的片段。版本变化与升级步骤见 [CHANGELOG.md](./CHANGELOG.md)。

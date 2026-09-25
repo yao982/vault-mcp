@@ -1,124 +1,86 @@
-# Vault-MCP
+# Vault-MCP 0.5.0
 
-<div align="center">
+本地知识库 MCP 服务：SQLite 关键词检索、本地向量、RRF 候选排序、大纲分块和 PDF 路径关联。
 
-**轻量级本地私有知识库 MCP 服务**  
-*支持 SQLite BM25 关键词与本地向量混合检索 · 大纲感知分块 · 同名 PDF 路径关联 · 文件增量监听*
+[English](./README_EN.md) | 简体中文 | [更新记录](./CHANGELOG.md)
 
-[![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
-[![MCP](https://img.shields.io/badge/Protocol-Anthropic%20MCP-purple.svg)](https://modelcontextprotocol.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+Vault-MCP 将 Markdown 笔记、论文转换文本和源代码提供给支持 MCP 的客户端。索引和向量计算在本机完成，不需要云端 Embedding API。**客户端收到的原文片段可能被发送给其使用的云端 AI；本地检索不等于整个问答流程不出设备。**
 
-[English](./README_EN.md) | **简体中文**
+## 安装与启动
 
-</div>
-
----
-
-## 📖 项目简介
-
-Vault-MCP 是一个基于 Anthropic **Model Context Protocol (MCP)** 协议构建的本地知识库检索服务。
-
-它旨在帮助开发者和科研工作者将本地的 Markdown 笔记、学术论文整理（如 MinerU 转换产物）和代码文件接入到支持 MCP 协议的 AI 客户端中（如 Cursor、Claude Desktop、VS Code 插件等），实现本地优先、离线可用的私有资料检索。
-
----
-
-## ⚙️ 核心特性
-
-* **本地离线运行**：利用 SQLite (FTS5) 与本地 ONNX 运行时（`bge-small-zh-v1.5`）完成索引与检索，数据保存在本地单个 `.vault_index.db` 文件中，不依赖第三方云端 Embedding API。
-* **混合检索策略 (Hybrid Search)**：
-  * **关键词检索**：基于 SQLite FTS5 的 BM25 算法，针对代码函数名、专有名词与精确术语进行匹配；
-  * **语义向量检索**：基于 512 维本地向量计算余弦相似度，辅助处理同义词与自然语言提问；
-  * **RRF 排序融合**：采用倒数排名融合（Reciprocal Rank Fusion）算法综合两路检索结果。
-* **Markdown 大纲感知分块**：按标题层级（`#` / `##`）划分文本切片，维护章节面包屑路径；在切片过程中避免打断多行 LaTeX 数学公式（`$$...$$`）与代码块（```` ``` ````）。
-* **同名 PDF 关联引用**：针对习惯保留原版 PDF、同时使用 Markdown 记录笔记或阅读论文的用户，扫描时会自动探测同级同名的 `.pdf` 文件。在返回检索切片时，一并提供原版 PDF 的本地相对路径，便于跳转查阅。
-* **增量文件监听**：基于 Chokidar 监听知识库目录。保存或修改文件时执行单文件增量更新，删除文件时同步清理对应索引。
-
----
-
-## 🛠️ 系统分层架构
-
-| 架构层级 | 核心模块 / 技术 | 职责说明 |
-| :--- | :--- | :--- |
-| **1. 协议交互层**<br>*(MCP Interface)* | `@modelcontextprotocol/sdk`<br>(stdio 管道 / JSON-RPC 2.0) | 统一对接各类 AI 客户端（Cursor、Claude、VS Code 等），暴露 `search_vault`、`read_vault_file` 等标准接口 |
-| **2. 混合检索层**<br>*(Hybrid Search)* | • 关键词：SQLite FTS5 (BM25)<br>• 语义向量：`bge-small-zh-v1.5` (ONNX)<br>• 排序融合：RRF 算法 | 结合精准词频倒排匹配与 512 维向量余弦相似度，避免单一检索方式漏查或不准，加权计算综合排名 |
-| **3. 解析与关联层**<br>*(Parser & Binding)* | • Markdown 大纲感知切片器<br>• 双生文件探测器 (`twinBinder`) | 按 `#` 标题层级维护面包屑路径；保护 LaTeX 公式与代码块不被截断；自动检测同名原版 `.pdf` 并附带路径引用 |
-| **4. 存储与监听层**<br>*(Storage & Watcher)* | • SQLite (`.vault_index.db`)<br>• Chokidar 文件监听器 | 单文件本地持久化（文本切片 + 二进制 BLOB 向量）；监听文件保存修改与删除事件，实现增量热更新 |
-
----
-
-## 🚀 快速上手
-
-### 1. 环境要求
-* [Node.js](https://nodejs.org/) >= 20.0.0
-* npm >= 9.0.0
-
-### 2. 克隆与构建
+需要 Node.js **>= 22** 及 npm。
 
 ```bash
 git clone https://github.com/yao982/vault-mcp.git
 cd vault-mcp
 npm install
 npm run build
+node dist/index.js --path "你的知识库绝对路径"
 ```
 
-构建完成后将在 `dist/` 目录下生成可执行入口 `dist/index.js`。
-
-### 3. 配置到 AI 客户端
-
-将以下配置加入对应客户端的 MCP 配置文件中，并替换 `--path` 为你的本地知识库实际路径：
-
-#### 在 Cursor 中使用
-进入 **Settings** ➔ **Features** ➔ **MCP Servers** ➔ **+ Add New MCP Server**：
-* **Name**: `vault-mcp`
-* **Type**: `command`
-* **Command**: 
-  ```bash
-  node "你的项目路径/dist/index.js" --path "你的知识库目录路径"
-  ```
-
-#### 在 Claude Desktop 中使用
-在配置文件（Windows: `%APPDATA%\Claude\claude_desktop_config.json`，macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`）中添加：
+正常使用时由 MCP 客户端启动上述命令；stdio 中的标准输出用于协议，诊断日志写入标准错误。客户端界面及配置文件位置取决于其版本，下面给出通用命令配置示例：
 
 ```json
 {
   "mcpServers": {
     "vault-mcp": {
       "command": "node",
-      "args": [
-        "你的项目路径/dist/index.js",
-        "--path",
-        "你的知识库目录路径"
-      ]
+      "args": ["D:/tools/vault-mcp/dist/index.js", "--path", "D:/notes"],
+      "env": {
+        "VAULT_OFFLINE": "1"
+      }
     }
   }
 }
 ```
 
----
+将两个路径替换为实际绝对路径。示例启用缓存模式；首次需要下载模型时，请先移除 `VAULT_OFFLINE`，允许模型下载并准备缓存。
 
-## 🧰 提供的 MCP 工具清单
+| 环境变量 | 行为 |
+| :--- | :--- |
+| `VAULT_EMBEDDINGS=off` | 仅关键词检索，不加载向量模型 |
+| `VAULT_OFFLINE=1` | 模型仅使用本地缓存，不下载；缓存缺失时不能提供向量能力 |
 
-| 工具名称 | 功能描述 | 核心参数 |
+默认模型为 `Xenova/bge-small-zh-v1.5`。模型文件、量化形式及附属文件影响下载体积，不承诺固定大小。下载或模型加载失败时仍可使用关键词检索，状态通过 `get_vault_stats` 查看。
+
+## 四个 MCP 工具
+
+| 工具 | 用途 | 参数 |
 | :--- | :--- | :--- |
-| `search_vault` | 基于 BM25 与本地向量混合检索相关内容切片 | `query` (检索语句), `limit` (返回数量，默认 5) |
-| `read_vault_file` | 查看指定文件的完整原文或指定行范围 | `relative_path` (文件相对路径), `start_line`, `end_line` |
-| `get_vault_stats` | 获取知识库当前状态（文档数、切片数、向量数、数据库体积） | 无 |
-| `ping_vault` | 服务连接状态自检 | `message` (可选测试文本) |
+| `ping_vault` | 检查协议连接 | `message` 可选 |
+| `get_vault_stats` | 文档、切片、向量数量及索引和模型状态 | 无 |
+| `search_vault` | 返回关键词/向量排序的候选片段 | `query`，`limit` 默认 5 |
+| `read_vault_file` | 读取知识库内文件或行范围 | `relative_path`，可选 `start_line`、`end_line`，行号从 1 开始 |
 
----
+服务先连接 MCP，再在后台扫描。**连接成功并不代表索引完成**；初次扫描中结果可能不完整，请先查看状态。读取工具使用真实路径（`realpath`）检查知识库边界，拒绝越界路径和指向库外的符号链接；它不是任意磁盘文件读取接口。
 
-## ⚠️ 局限性与设计边界说明
+## 检索如何工作
 
-在选择使用本项目前，请注意以下技术考量：
+1. **文本与分块**：按 Markdown 标题维护章节路径，保留代码与数学块的完整原文。PDF 只提供关联路径，不提取其文字；扫描面向 Markdown、文本及支持的源代码格式。
+2. **关键词**：SQLite FTS5 保存英文词元，并在 `search_text` 中生成汉字单字和相邻双字。例如“液压控制”生成“液、压、控、制”和“液压、压控、控制”。中文多字查询要求对应双字词元共同出现。这是字符级检索，**不是自然语言分词**；共同出现不证明原文中有相同的连续短语或语义。
+3. **向量**：原始切片正文 `chunk.content`（保留切片中原有的本节标题）按实际 tokenizer 长度分窗口，不重复拼接祖先标题路径 `headingPath`；标题路径仍参与关键词检索，并作为结果出处显示。每窗使用 CLS 表示并归一化，再按有效 token 数加权聚合、进行 L2 归一化。长段落、代码和公式的尾部也参与计算，不再只取前 512 字符。聚合覆盖全文，但可能稀释局部主题，不保证每个尾部细节都排在前面。
+4. **排序**：查询向量与存储向量做余弦比较；RRF 按关键词和向量候选的名次融合。融合分**不是相关概率**；没有相关资料时仍可能返回向量候选。请用路径、行号和 `read_vault_file` 核对原文，再引用结论。
 
-1. **模型冷启动下载**：首次启动并计算向量时，会从 Hugging Face / 镜像源下载约 90MB 的 ONNX 模型文件（`bge-small-zh-v1.5`），下载完成后保存在本地缓存，之后完全离线运行。
-2. **适用数据规模**：当前向量检索是在 SQLite 读取后进行内存余弦点积计算，适合个人及小型团队的中小规模知识库（数千个切片，耗时一般在几十毫秒内）。若知识库规模达到数十万量级以上，建议改用专门的向量索引库（如 HNSW 扩展）。
-3. **PDF 不直接解析**：本项目不对 `.pdf` 进行文本提取，主要面向以 Markdown 笔记为主、原版 PDF 作为对照引用的工作流。如果需要解析 PDF，建议配合 [MinerU](https://github.com/opendatalab/MinerU) 等工具先转为 Markdown。
+向量检索目前遍历存储的向量，耗时随切片数、硬件和输入长度增长，未承诺固定延迟。SQLite 主数据库位于知识库的 `.vault_index.db`；运行时可能存在 WAL/SHM 辅助文件，模型缓存另存。
 
----
+## 更新与一致性
 
-## 📄 开源许可证
+从旧版升级时，先停止使用同一知识库的旧服务，再更新代码、执行 `npm install` 和 `npm run build`，最后重启 MCP 客户端。首次启动会自动迁移派生索引并重建旧版本向量，原始资料无需移动或删除；用 `get_vault_stats` 确认索引状态。避免旧版与新版同时写入同一索引数据库。
 
-本项目基于 [MIT License](./LICENSE) 开源。
+启动扫描使用内容 hash 和 `INDEX_VERSION` 判断是否复用；启用向量时，还要求向量完整。内容或索引算法变化会重新处理，停机期间删除的文件会在下次扫描时从索引清理。监听器更新新增、修改和删除；同一文件任务串行，写入前确认文件快照，避免旧计算覆盖新内容。实际可检索时间包含监听等待、文件读取和模型推理时间。
+
+同名 PDF 用于辅助查阅，不代表已经验证其内容或论文真实性。`sample_vault` 中的 **66 字节 PDF 是路径关联测试占位文件，不是真实论文**。
+
+## 验证
+
+```bash
+npm test
+npm run test:integration
+npm run build
+```
+
+`npm test` 先检查源码和测试的类型，再执行离线回归（含实际 MCP 关键词模式与文件监听）；`npm run test:integration` 使用真实缓存模型，需要事先准备模型缓存；`npm run build` 检查 TypeScript 构建。未运行某一层验证就不能视为该层通过；本次验收记录见 [PROJECT_PLAN.md](./PROJECT_PLAN.md)。入门原理见 [LEARNING_GUIDE.md](./LEARNING_GUIDE.md)。
+
+## 许可证
+
+[MIT License](./LICENSE)

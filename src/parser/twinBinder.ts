@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { resolveVaultPath } from "../vaultPaths.js";
 
 /**
  * 双生文件关联探测器 (Twin-File Binder)
@@ -18,17 +19,26 @@ export function findTwinPdf(vaultRoot: string, relativeMdPath: string): string |
 
   // 1. 最常见的同级同名探测: paper.md 同目录下是否存在 paper.pdf
   const directPdfPath = path.join(dir, `${baseName}.pdf`);
-  if (fs.existsSync(directPdfPath)) {
-    return path.relative(vaultRoot, directPdfPath).replace(/\\/g, "/");
+  const safePdf = (candidate: string): string | null => {
+    const relative = path.relative(vaultRoot, candidate).replace(/\\/g, "/");
+    try { return fs.statSync(resolveVaultPath(vaultRoot, relative)).isFile() ? relative : null; }
+    catch { return null; }
+  };
+  const direct = safePdf(directPdfPath);
+  if (direct) return direct;
+  // Case-insensitive matching also works on case-sensitive filesystems.
+  const matching = fs.readdirSync(dir).find(name => name.toLowerCase() === `${baseName}.pdf`.toLowerCase());
+  if (matching) {
+    const found = safePdf(path.join(dir, matching));
+    if (found) return found;
   }
 
   // 2. 检查 MinerU 常见结构：MinerU 经常会把 paper.pdf 解包成 paper/ 目录并在里面生成同名或 index.md
   const parentDir = path.dirname(dir);
   const parentBase = path.basename(dir);
   const parentPdfPath = path.join(parentDir, `${parentBase}.pdf`);
-  if (fs.existsSync(parentPdfPath)) {
-    return path.relative(vaultRoot, parentPdfPath).replace(/\\/g, "/");
-  }
+  const parentPdf = safePdf(parentPdfPath);
+  if (parentPdf) return parentPdf;
 
   // 没有找到关联的 PDF
   return null;

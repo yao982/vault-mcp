@@ -1,118 +1,86 @@
-# Vault-MCP
+# Vault-MCP 0.5.0
 
-<div align="center">
+A local knowledge base MCP server with SQLite keyword retrieval, local embeddings, RRF candidate ranking, outline-aware chunks, and PDF path references.
 
-**Lightweight Local-First Knowledge Base MCP Server**  
-*SQLite BM25 & Local Vector Hybrid Search · Outline-Aware Chunking · Paired PDF Linking · Incremental File Watcher*
+English | [简体中文](./README.md) | [Changelog](./CHANGELOG.md)
 
-[![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/)
-[![MCP](https://img.shields.io/badge/Protocol-Anthropic%20MCP-purple.svg)](https://modelcontextprotocol.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+Vault-MCP exposes Markdown notes, converted paper text, and source code to MCP clients. Indexing and embeddings run locally without a cloud embedding API. **Your client may send returned passages to its cloud AI provider; local retrieval does not make the entire conversation local.**
 
-**English** | [简体中文](./README.md)
+## Install and start
 
-</div>
-
----
-
-## 📖 Overview
-
-Vault-MCP is a local knowledge base retrieval server built on Anthropic's **Model Context Protocol (MCP)**.
-
-It connects local Markdown notes, academic paper conversions (such as MinerU output), and source code to MCP-compatible AI clients (Cursor, Claude Desktop, VS Code plugins, etc.), offering local-first, privacy-preserving retrieval without external cloud API dependencies.
-
----
-
-## ⚙️ Key Features
-
-* **100% Local & Offline**: Uses SQLite (FTS5) and local ONNX runtime (`bge-small-zh-v1.5`) for indexing and retrieval. All data resides in a single local `.vault_index.db` file without external API keys.
-* **Hybrid Search Strategy**:
-  * **Keyword Search**: SQLite FTS5 with the BM25 algorithm for exact terms, identifiers, and function names;
-  * **Dense Semantic Vector Search**: Local 512-dimensional embeddings via ONNX to assist with synonyms and natural language phrasing;
-  * **RRF Rank Fusion**: Combines rankings using Reciprocal Rank Fusion.
-* **Outline-Aware Chunking**: Chunks text by heading levels (`#` / `##`) to preserve breadcrumb context, avoiding splits inside multiline LaTeX math blocks (`$$...$$`) and code blocks (```` ``` ````).
-* **Paired PDF Reference**: For workflows where original PDFs are retained alongside Markdown notes, the scanner detects matching `.pdf` files and includes their relative path in search results for reference.
----
-
-## 🛠️ System Architecture
-
-| Layer | Module & Technology | Responsibilities |
-| :--- | :--- | :--- |
-| **1. MCP Interface** | `@modelcontextprotocol/sdk`<br>(stdio transport / JSON-RPC 2.0) | Connects to AI clients (Cursor, Claude, VS Code, etc.), exposing `search_vault`, `read_vault_file` tools |
-| **2. Hybrid Search** | • Keyword: SQLite FTS5 (BM25)<br>• Vector: `bge-small-zh-v1.5` (ONNX)<br>• Fusion: RRF Algorithm | Combines inverted index frequency matching with 512-d dense vector cosine similarity via Reciprocal Rank Fusion |
-| **3. Parser & Binding** | • Outline-aware Markdown Chunker<br>• Paired PDF Detector (`twinBinder`) | Preserves heading hierarchy breadcrumbs; protects LaTeX equations and code blocks; detects companion `.pdf` papers |
-| **4. Storage & Watcher** | • SQLite (`.vault_index.db`)<br>• Chokidar File Watcher | Single-file local persistence (chunks + binary BLOB embeddings); monitors file saves and deletions for debounced hot-reloads |
-
----
-
-## 🚀 Quick Start
-
-### Requirements
-* [Node.js](https://nodejs.org/) >= 20.0.0
-* npm >= 9.0.0
-
-### Build & Setup
+Requires Node.js **>= 22** and npm.
 
 ```bash
 git clone https://github.com/yao982/vault-mcp.git
 cd vault-mcp
 npm install
 npm run build
+node dist/index.js --path "/absolute/path/to/vault"
 ```
 
-Executable output will be generated at `dist/index.js`.
-
-### Client Configuration
-
-#### Cursor
-Under **Settings** ➔ **Features** ➔ **MCP Servers** ➔ **+ Add New MCP Server**:
-* **Name**: `vault-mcp`
-* **Type**: `command`
-* **Command**: 
-  ```bash
-  node "/path/to/vault-mcp/dist/index.js" --path "/path/to/your/vault"
-  ```
-
-#### Claude Desktop
-Add to your `claude_desktop_config.json`:
+Normally the MCP client starts this command. Standard output carries the stdio protocol; diagnostics use standard error. Configuration locations and client interfaces vary by client version. A generic command configuration is:
 
 ```json
 {
   "mcpServers": {
     "vault-mcp": {
       "command": "node",
-      "args": [
-        "/path/to/vault-mcp/dist/index.js",
-        "--path",
-        "/path/to/your/vault"
-      ]
+      "args": ["D:/tools/vault-mcp/dist/index.js", "--path", "D:/notes"],
+      "env": {
+        "VAULT_OFFLINE": "1"
+      }
     }
   }
 }
 ```
 
----
+Replace both paths with real absolute paths. This example uses cached models only. Remove `VAULT_OFFLINE` when preparing a model cache for the first time so downloading is allowed.
 
-## 🧰 Available MCP Tools
+| Environment variable | Behavior |
+| :--- | :--- |
+| `VAULT_EMBEDDINGS=off` | Keyword retrieval only; no embedding model load |
+| `VAULT_OFFLINE=1` | Use local model cache without downloading; missing cache prevents vector functionality |
 
-| Tool | Description | Parameters |
+The default model is `Xenova/bge-small-zh-v1.5`. Download size depends on model files, quantization, and supporting files; no fixed size is promised. Keyword retrieval remains available when downloading or loading fails. Inspect model status through `get_vault_stats`.
+
+## Four MCP tools
+
+| Tool | Purpose | Parameters |
 | :--- | :--- | :--- |
-| `search_vault` | Hybrid search combining BM25 and local vector embeddings | `query` (string), `limit` (number, default: 5) |
-| `read_vault_file` | Read full or partial content of a specific file | `relative_path` (string), `start_line`, `end_line` |
-| `get_vault_stats` | Inspect vault stats (document count, chunk count, vector count, DB size) | None |
-| `ping_vault` | Check server connectivity | `message` (optional string) |
+| `ping_vault` | Check the protocol connection | Optional `message` |
+| `get_vault_stats` | Document/chunk/vector counts and indexing/model status | None |
+| `search_vault` | Return keyword/vector retrieval candidates | `query`, `limit` (default 5) |
+| `read_vault_file` | Read a vault file or line range | `relative_path`, optional `start_line` and `end_line` (1-based) |
 
----
+The server connects MCP before scanning in the background. **A successful connection does not mean indexing has finished.** Results may be incomplete during the initial scan; check status first. File reads enforce the vault boundary using resolved real paths (`realpath`), rejecting escapes and symlinks targeting files outside the vault.
 
-## ⚠️ Limitations & Considerations
+## Retrieval behavior
 
-1. **Initial Model Download**: On first run, the local embedding runtime will download ~90MB of quantized ONNX model weights (`bge-small-zh-v1.5`). Once cached locally, it operates fully offline.
-2. **Scale Scope**: Vector similarity currently computes in-memory dot products over SQLite-stored embeddings, optimized for personal-to-medium scale vaults (thousands of chunks, typically < 50ms). For massive enterprise callsets (>100k chunks), dedicated vector indexing (e.g. HNSW) would be preferable.
-3. **No Direct PDF Parsing**: Raw `.pdf` files are not parsed directly. They serve as companion references to converted Markdown documents. For academic papers, tools like [MinerU](https://github.com/opendatalab/MinerU) are recommended for preliminary conversion.
+1. **Text and chunks:** Markdown heading paths provide context, while code and math blocks retain their original text. PDFs are references only; their text is not extracted. Scanning covers Markdown, plain text, and supported source code formats.
+2. **Keywords:** SQLite FTS5 retains English tokens and adds individual Han characters and adjacent character pairs in `search_text`. For example, “液压控制” produces “液、压、控、制” and “液压、压控、控制”. Multi-character Chinese queries require the corresponding pair tokens together. This is character-based retrieval, **not linguistic word segmentation**. Pair co-occurrence does not establish an exact contiguous phrase or its meaning.
+3. **Embeddings:** Original chunk content (`chunk.content`, retaining any section heading already in the chunk) is split into windows using actual tokenizer lengths. Ancestor heading paths (`headingPath`) are not prepended again; they remain part of keyword retrieval and source attribution. Each window uses normalized CLS pooling; vectors are averaged with effective token-count weights and L2-normalized again. The tails of long paragraphs, code, and equations participate instead of stopping at 512 characters. Averaging can dilute local details, so complete input coverage does not guarantee high retrieval rank for every detail.
+4. **Ranking:** Query and stored vectors are compared by cosine similarity, then RRF merges keyword and vector ranks. The fusion score **is not a relevance probability**. Vector candidates may appear even when the vault has no relevant answer. Verify their paths, line numbers, and original text with `read_vault_file` before citing conclusions.
 
----
+Vector retrieval currently scans stored vectors. Latency grows with chunk count and depends on hardware and input length; there is no fixed latency promise. The primary database is `.vault_index.db` inside the vault. WAL/SHM files may exist while it runs, and model caches are stored separately.
 
-## 📄 License
+## Updates and consistency
 
-Licensed under the [MIT License](./LICENSE).
+To upgrade, stop older servers using the same vault, update the source, run `npm install` and `npm run build`, then restart your MCP client. The first startup migrates the derived index and rebuilds older vectors automatically; source documents do not need to be moved or deleted. Check progress with `get_vault_stats`. Avoid running old and new servers against the same index database at once.
+
+Startup scans use content hashes and `INDEX_VERSION` to decide reuse; when embeddings are enabled, vectors must also be complete. Changed content or index algorithms trigger processing. Files deleted while the server was stopped are removed from the index on the next scan. The watcher handles additions, changes, and deletions; tasks for the same file are serialized and the file snapshot is checked before saving, preventing stale work from overwriting newer content. Update latency includes watcher delays, reads, and inference.
+
+A paired PDF path is a navigation aid, not evidence that its content or authenticity was verified. The **66-byte PDF in `sample_vault` is a path-binding placeholder, not a real paper**.
+
+## Validation
+
+```bash
+npm test
+npm run test:integration
+npm run build
+```
+
+`npm test` type-checks source and tests, then runs offline regressions, including actual MCP keyword-mode calls and filesystem watching. `npm run test:integration` uses the real cached model and requires a prepared cache. `npm run build` checks the TypeScript build. An unrun validation layer must not be reported as passed. See [PROJECT_PLAN.md](./PROJECT_PLAN.md) for acceptance records and the Chinese [LEARNING_GUIDE.md](./LEARNING_GUIDE.md) for introductory explanations.
+
+## License
+
+[MIT License](./LICENSE)
