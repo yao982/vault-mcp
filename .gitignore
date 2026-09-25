@@ -1,0 +1,23 @@
+# 依赖库目录（体积巨大，他人下载后通过 npm install 生成）
+node_modules/
+
+# 编译生成的 JavaScript 产物
+dist/
+
+# SQLite 本地索引数据库与临时 WAL 文件（保护用户本地私有数据）
+*.db
+*.db-wal
+*.db-shm
+.vault_index.db
+sample_vault/.vault_index.db
+
+# 日志与缓存
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+.DS_Store
+Thumbs.db
+
+# 本地环境变量配置文件
+.env
+.env.local
